@@ -45,7 +45,9 @@ abstract class JdbcSqlOperations : SqlOperations {
      * @param e the exception to check.
      * @return A ConfigErrorException with a message with actionable feedback to the user.
      */
-    protected fun checkForKnownConfigExceptions(e: Exception?): Optional<ConfigErrorException> {
+    protected open fun checkForKnownConfigExceptions(
+        e: Exception?
+    ): Optional<ConfigErrorException> {
         return Optional.empty()
     }
 
@@ -206,7 +208,7 @@ abstract class JdbcSqlOperations : SqlOperations {
         }
     }
 
-    fun dropTableIfExistsQuery(schemaName: String?, tableName: String?): String {
+    open fun dropTableIfExistsQuery(schemaName: String?, tableName: String?): String {
         return String.format("DROP TABLE IF EXISTS %s.%s;\n", schemaName, tableName)
     }
 

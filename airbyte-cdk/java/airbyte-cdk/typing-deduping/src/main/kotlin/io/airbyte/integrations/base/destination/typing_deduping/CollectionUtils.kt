@@ -30,6 +30,7 @@ object CollectionUtils {
      * @param searchTerms the keys you're looking for
      * @return whether all searchTerms are in the searchCollection
      */
+    @JvmStatic
     fun containsAllIgnoreCase(
         searchCollection: Collection<String>,
         searchTerms: Collection<String>

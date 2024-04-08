@@ -358,7 +358,7 @@ abstract class JdbcDestinationHandler<DestinationState>(
                 existingTable.columns[JavaBaseConstants.COLUMN_NAME_AB_META]!!.type
     }
 
-    private fun existingSchemaMatchesStreamConfig(
+    open protected fun existingSchemaMatchesStreamConfig(
         stream: StreamConfig?,
         existingTable: TableDefinition
     ): Boolean {
@@ -544,6 +544,7 @@ abstract class JdbcDestinationHandler<DestinationState>(
             return Optional.of(TableDefinition(retrievedColumnDefns))
         }
 
+        @JvmStatic
         fun fromIsNullableIsoString(isNullable: String?): Boolean {
             return "YES".equals(isNullable, ignoreCase = true)
         }

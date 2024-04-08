@@ -1469,7 +1469,7 @@ abstract class DestinationAcceptanceTest {
     }
 
     /** Whether the destination should be tested against different namespaces. */
-    protected fun supportNamespaceTest(): Boolean {
+    open protected fun supportNamespaceTest(): Boolean {
         return false
     }
 
