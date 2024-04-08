@@ -9,8 +9,9 @@ airbyteJavaConnector {
             'datastore-bigquery',
             'typing-deduping',
             'gcs-destinations',
+            'core',
     ]
-    useLocalCdk = false
+    useLocalCdk = true
 }
 
 java {

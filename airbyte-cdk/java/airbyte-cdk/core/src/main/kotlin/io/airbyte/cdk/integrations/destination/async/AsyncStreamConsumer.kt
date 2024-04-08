@@ -44,7 +44,7 @@ private val logger = KotlinLogging.logger {}
  * memory limit governed by [GlobalMemoryManager]. Record writing is decoupled via [FlushWorkers].
  * See the other linked class for more detail.
  */
-class AsyncStreamConsumer
+open class AsyncStreamConsumer
 @VisibleForTesting
 constructor(
     outputRecordCollector: Consumer<AirbyteMessage>,

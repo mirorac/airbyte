@@ -1322,7 +1322,7 @@ abstract class BaseSqlGeneratorIntegrationTest<DestinationState : MinimumDestina
         strings = ["$", "\${", "\${\${", "\${foo}", "\"", "'", "`", ".", "$$", "\\", "{", "}"]
     )
     @Throws(Exception::class)
-    fun noCrashOnSpecialCharacters(specialChars: String) {
+    open fun noCrashOnSpecialCharacters(specialChars: String) {
         val str = specialChars + "_" + namespace + "_" + specialChars
         val originalStreamId = generator!!.buildStreamId(str, str, "unused")
         val modifiedStreamId =
@@ -1598,7 +1598,7 @@ abstract class BaseSqlGeneratorIntegrationTest<DestinationState : MinimumDestina
 
     @Test
     @Throws(Exception::class)
-    fun testStateHandling() {
+    open fun testStateHandling() {
         // Fetch state from an empty destination. This should not throw an error.
         val initialState =
             destinationHandler!!

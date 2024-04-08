@@ -4,6 +4,7 @@
 package io.airbyte.cdk.integrations.destination.staging
 
 import io.airbyte.cdk.db.jdbc.JdbcDatabase
+import io.airbyte.cdk.integrations.base.JavaBaseConstants
 import io.airbyte.cdk.integrations.destination.async.function.DestinationFlushFunction
 import io.airbyte.cdk.integrations.destination.async.model.PartialAirbyteMessage
 import io.airbyte.cdk.integrations.destination.jdbc.WriteConfig
@@ -39,7 +40,7 @@ internal class AsyncFlush(
     // the batch size, the AsyncFlusher will flush in smaller batches which allows for memory to be
     // freed earlier similar to a sliding window effect
     override val optimalBatchSizeBytes: Long,
-    private val useDestinationsV2Columns: Boolean
+    private val destinationColumns: JavaBaseConstants.DestinationColumns
 ) : DestinationFlushFunction {
     private val streamDescToWriteConfig: Map<StreamDescriptor, WriteConfig> =
         streamDescToWriteConfig
@@ -51,7 +52,7 @@ internal class AsyncFlush(
             writer =
                 CsvSerializedBuffer(
                     FileBuffer(CsvSerializedBuffer.CSV_GZ_SUFFIX),
-                    StagingDatabaseCsvSheetGenerator(useDestinationsV2Columns),
+                    StagingDatabaseCsvSheetGenerator(destinationColumns),
                     true
                 )
 
