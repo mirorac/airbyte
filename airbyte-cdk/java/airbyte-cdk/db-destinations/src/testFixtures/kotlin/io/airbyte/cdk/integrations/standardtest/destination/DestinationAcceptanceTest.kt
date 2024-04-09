@@ -608,7 +608,7 @@ abstract class DestinationAcceptanceTest {
      */
     @Test
     @Throws(Exception::class)
-    fun testLineBreakCharacters() {
+    open fun testLineBreakCharacters() {
         val catalog =
             Jsons.deserialize<AirbyteCatalog>(
                 MoreResources.readResource(
