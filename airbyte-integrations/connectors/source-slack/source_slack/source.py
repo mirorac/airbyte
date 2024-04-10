@@ -120,9 +120,10 @@ class JoinChannelsStream(HttpStream):
 class ChanneledStream(SlackStream, ABC):
     """Slack stream with channel filter"""
 
-    def __init__(self, channel_filter: List[str] = [], join_channels: bool = False, **kwargs):
+    def __init__(self, channel_filter: List[str] = [], join_channels: bool = False, include_private_channels: bool = False **kwargs):
         self.channel_filter = channel_filter
         self.join_channels = join_channels
+        self.include_private_channels = include_private_channels
         self.kwargs = kwargs
         super().__init__(**kwargs)
 
@@ -157,6 +158,8 @@ class Channels(ChanneledStream):
     def request_params(self, **kwargs) -> MutableMapping[str, Any]:
         params = super().request_params(**kwargs)
         params["types"] = "public_channel"
+        if self.include_private_channels:
+            params["types"] += ",private_chanel"
         return params
 
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[MutableMapping]:
@@ -385,8 +388,9 @@ class SourceSlack(AbstractSource):
         threads_lookback_window = pendulum.Duration(days=config["lookback_window"])
         channel_filter = config.get("channel_filter", [])
         should_join_to_channels = config.get("join_channels")
+        include_private_channels = config.get("read_private_channels")
 
-        channels = Channels(authenticator=authenticator, join_channels=should_join_to_channels, channel_filter=channel_filter)
+        channels = Channels(authenticator=authenticator, join_channels=should_join_to_channels, channel_filter=channel_filter, include_private_channels=include_private_channels)
         streams = [
             channels,
             ChannelMembers(authenticator=authenticator, channel_filter=channel_filter),
