@@ -1,13 +1,13 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   page_size: 50
   selector:
     extractor:
-      field_path: ["data"]
+      field_path: [data]
   requester:
     url_base: "{{ config['region']['url_base'] }}"
-    http_method: "GET"
+    http_method: GET
     authenticator:
       type: BearerAuthenticator
       api_token: "{{ config['access_token'] }}"
@@ -15,94 +15,439 @@ definitions:
     record_selector:
       $ref: "#/definitions/selector"
     paginator:
-      type: "DefaultPaginator"
+      type: DefaultPaginator
       page_size_option:
-        inject_into: "request_parameter"
-        field_name: "limit"
+        inject_into: request_parameter
+        field_name: limit
       pagination_strategy:
-        type: "PageIncrement"
+        type: PageIncrement
         page_size: "#/definitions/page_size"
       page_token_option:
         type: RequestOption
-        inject_into: "request_parameter"
-        field_name: "page"
+        inject_into: request_parameter
+        field_name: page
     requester:
       $ref: "#/definitions/requester"
   base_stream:
-    schema_loader:
-      type: JsonFileSchemaLoader
-      file_path: "./source_survey_sparrow/schemas/{{ parameters['name'] }}.json"
     retriever:
       $ref: "#/definitions/retriever"
   contacts_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "contacts"
-      primary_key: "id"
-      path: "/contacts"
+      name: contacts
+      primary_key: id
+      path: /contacts
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          email:
+            type:
+              - "null"
+              - string
+          mobile:
+            type:
+              - "null"
+              - string
+          job_title:
+            type:
+              - "null"
+              - string
+          active:
+            type:
+              - "null"
+              - boolean
+          unsubscribed:
+            type:
+              - "null"
+              - boolean
+          name:
+            type:
+              - "null"
+              - string
+          last_name:
+            type:
+              - "null"
+              - string
+          first_name:
+            type:
+              - "null"
+              - string
+          createddate:
+            type:
+              - "null"
+              - string
   contact_lists_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "contact_lists"
-      primary_key: "id"
-      path: "/contact_lists"
+      name: contact_lists
+      primary_key: id
+      path: /contact_lists
     paginator:
-      type: "NoPagination"
+      type: NoPagination
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
   questions_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "questions"
-      primary_key: "id"
-      path: "/questions"
+      name: questions
+      primary_key: id
+      path: /questions
     retriever:
       $ref: "#/definitions/base_stream/retriever"
       partition_router:
-        type: "ListPartitionRouter"
+        type: ListPartitionRouter
         values: "{{ config.get('survey_id') }}"
-        cursor_field: "survey_id"
+        cursor_field: survey_id
         request_option:
-          field_name: "survey_id"
-          inject_into: "request_parameter"
+          field_name: survey_id
+          inject_into: request_parameter
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          rtxt:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          multiple_answers:
+            type:
+              - "null"
+              - boolean
+          is_required:
+            type:
+              - "null"
+              - boolean
+          properties:
+            type:
+              - "null"
+              - object
+            properties:
+              data:
+                type:
+                  - "null"
+                  - object
+              clone:
+                type:
+                  - "null"
+                  - object
+          parent_question_id:
+            type:
+              - "null"
+              - integer
+          position:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          updated_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          section:
+            type:
+              - "null"
+              - object
+          tags:
+            type:
+              - "null"
+              - array
+          annotations:
+            type:
+              - "null"
+              - array
+          scale_points:
+            type:
+              - "null"
+              - array
+          choices:
+            type:
+              - "null"
+              - array
   responses_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "responses"
-      primary_key: "id"
-      path: "/responses"
+      name: responses
+      primary_key: id
+      path: /responses
     retriever:
       $ref: "#/definitions/base_stream/retriever"
       partition_router:
-        type: "ListPartitionRouter"
+        type: ListPartitionRouter
         values: "{{ config.get('survey_id') }}"
-        cursor_field: "survey_id"
+        cursor_field: survey_id
         request_option:
-          field_name: "survey_id"
-          inject_into: "request_parameter"
+          field_name: survey_id
+          inject_into: request_parameter
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          completed_time:
+            type:
+              - "null"
+              - string
+            format: date-time
+          survey_id:
+            type:
+              - "null"
+              - integer
+          state:
+            type:
+              - "null"
+              - string
+          channel_id:
+            type:
+              - "null"
+              - integer
+          language:
+            type:
+              - "null"
+              - string
+          start_time:
+            type:
+              - "null"
+              - string
+            format: date-time
+          contact:
+            type:
+              - "null"
+              - string
+          channel:
+            type:
+              - "null"
+              - object
+          answers:
+            type:
+              - "null"
+              - array
+          variables:
+            type:
+              - "null"
+              - array
+          expressions:
+            type:
+              - "null"
+              - array
   roles_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "roles"
-      primary_key: "id"
-      path: "/roles"
+      name: roles
+      primary_key: id
+      path: /roles
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          label:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          updated_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          deleted_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          account_id:
+            type:
+              - "null"
+              - integer
   surveys_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "surveys"
-      primary_key: "id"
-      path: "/surveys"
+      name: surveys
+      primary_key: id
+      path: /surveys
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          archived:
+            type:
+              - "null"
+              - boolean
+          survey_type:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
   survey_folders_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "survey_folders"
-      primary_key: "id"
-      path: "/survey_folders"
+      name: survey_folders
+      primary_key: id
+      path: /survey_folders
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          auto_created:
+            type:
+              - "null"
+              - boolean
+          visibility:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
   users_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "users"
-      primary_key: "id"
-      path: "/users"
+      name: users
+      primary_key: id
+      path: /users
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          email:
+            type:
+              - "null"
+              - string
+          phone:
+            type:
+              - "null"
+              - string
+          admin:
+            type:
+              - "null"
+              - boolean
+          owner:
+            type:
+              - "null"
+              - boolean
+          agency_owner:
+            type:
+              - "null"
+              - boolean
+          verified:
+            type:
+              - "null"
+              - boolean
+          role_id:
+            type:
+              - "null"
+              - integer
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
 streams:
   - "#/definitions/contacts_stream"
   - "#/definitions/contact_lists_stream"
@@ -115,4 +460,4 @@ streams:
 
 check:
   stream_names:
-    - "roles"
+    - roles

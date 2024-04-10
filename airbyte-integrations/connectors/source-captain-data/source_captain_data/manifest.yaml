@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
@@ -8,11 +8,11 @@ definitions:
       field_path: []
   requester:
     type: HttpRequester
-    url_base: "https://api.captaindata.co/v3/"
-    http_method: "GET"
+    url_base: https://api.captaindata.co/v3/
+    http_method: GET
     authenticator:
       type: ApiKeyAuthenticator
-      header: "x-api-key"
+      header: x-api-key
       api_token: "{{ config['api_key'] }}"
     request_headers:
       x-project-id: "{{ config['project_uid'] }}"
@@ -26,13 +26,13 @@ definitions:
       $ref: "#/definitions/requester"
 
   captain_data_paginator:
-    type: "DefaultPaginator"
+    type: DefaultPaginator
     pagination_strategy:
-      type: "CursorPagination"
+      type: CursorPagination
       cursor_value: "{{ response['paging']['next']}}"
       stop_condition: "{{ response['paging']['have_next_page'] is false }}"
     page_token_option:
-      type: "RequestPath"
+      type: RequestPath
 
   # Base stream
   base_stream:
@@ -44,29 +44,116 @@ definitions:
   workspace_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "workspace"
-      primary_key: "name"
-      path: "/workspace"
+      name: workspace
+      primary_key: name
+      path: /workspace
     transformations:
       - type: AddFields
         fields:
-          - path: ["project_uid"]
+          - path: [project_uid]
             value: "{{ config['project_uid'] }}"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          project_uid:
+            type:
+              - "null"
+              - string
+          current_month_end:
+            type:
+              - "null"
+              - string
+          current_month_start:
+            type:
+              - "null"
+              - string
+          email:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          plan_name:
+            type:
+              - "null"
+              - string
+          tasks_left:
+            type:
+              - "null"
+              - integer
+          tasks_max:
+            type:
+              - "null"
+              - integer
+          tasks_used:
+            type:
+              - "null"
+              - integer
   workflows_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "workflows"
-      primary_key: "uid"
-      path: "/workflows"
+      name: workflows
+      primary_key: uid
+      path: /workflows
 
-  # Sliced streams
+    # Sliced streams
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          created_at:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          project_id:
+            type:
+              - "null"
+              - integer
+          steps:
+            items:
+              properties:
+                name:
+                  type:
+                    - "null"
+                    - string
+                step_uid:
+                  type:
+                    - "null"
+                    - string
+                uid:
+                  type:
+                    - "null"
+                    - string
+              type: object
+            type: array
+          template_uid:
+            type:
+              - "null"
+              - string
+          uid:
+            type:
+              - "null"
+              - string
   jobs_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "jobs"
-      primary_key: "uid"
-      path: "/workflows/{{ stream_slice.parent_id }}/jobs"
+      name: jobs
+      primary_key: uid
+      path: /workflows/{{ stream_slice.parent_id }}/jobs
     retriever:
       requester:
         $ref: "#/definitions/requester"
@@ -74,17 +161,94 @@ definitions:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/workflows_stream"
-            parent_key: "uid"
-            partition_field: "parent_id"
+            parent_key: uid
+            partition_field: parent_id
       record_selector:
         $ref: "#/definitions/selector"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          accounts:
+            items:
+              type:
+                - "null"
+                - string
+            type: array
+          configuration:
+            type:
+              - "null"
+              - object
+          error_message:
+            type:
+              - "null"
+              - string
+          finish_time:
+            type:
+              - "null"
+              - string
+          main_job_uid:
+            type:
+              - "null"
+              - string
+          main_job_name:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          number_inputs:
+            type:
+              - "null"
+              - integer
+          row_count:
+            type:
+              - "null"
+              - integer
+          scheduled_time:
+            type:
+              - "null"
+              - string
+          start_time:
+            type:
+              - "null"
+              - string
+          status:
+            type:
+              - "null"
+              - string
+          step_uid:
+            type:
+              - "null"
+              - string
+          total_row_count:
+            type:
+              - "null"
+              - integer
+          uid:
+            type:
+              - "null"
+              - string
+          workflow_name:
+            type:
+              - "null"
+              - string
+          workflow_uid:
+            type:
+              - "null"
+              - string
   successful_jobs_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "jobs"
-      primary_key: "uid"
-      path: "/workflows/{{ stream_slice.parent_id }}/jobs"
+      name: jobs
+      primary_key: uid
+      path: /workflows/{{ stream_slice.parent_id }}/jobs
     retriever:
       requester:
         $ref: "#/definitions/requester"
@@ -92,23 +256,25 @@ definitions:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/workflows_stream"
-            parent_key: "uid"
-            partition_field: "parent_id"
+            parent_key: uid
+            partition_field: parent_id
       record_selector:
         type: RecordSelector
         extractor:
           type: DpathExtractor
           field_path: []
         record_filter:
-          condition: "{{ record['total_row_count'] > 0 and record['status'] == 'finished' }}"
+          condition:
+            "{{ record['total_row_count'] > 0 and record['status'] == 'finished'
+            }}"
 
   job_results_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "job_results"
-      primary_key: "job_result_id"
-      path: "/jobs/{{ stream_slice.parent_id }}/results"
-      stream_cursor_field: "extracted_at"
+      name: job_results
+      primary_key: job_result_id
+      path: /jobs/{{ stream_slice.parent_id }}/results
+      stream_cursor_field: extracted_at
     retriever:
       requester:
         $ref: "#/definitions/requester"
@@ -118,25 +284,49 @@ definitions:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/successful_jobs_stream"
-            parent_key: "uid"
-            partition_field: "parent_id"
+            parent_key: uid
+            partition_field: parent_id
       record_selector:
         type: RecordSelector
         extractor:
           type: DpathExtractor
-          field_path: ["results"]
+          field_path: [results]
     transformations:
       - type: AddFields
         fields:
-          - path: ["results"]
+          - path: [results]
             value: "{{ record }}"
-          - path: ["job_result_id"]
+          - path: [job_result_id]
             value: "{{ record|hash('md5') }}"
-          - path: ["job_uid"]
+          - path: [job_uid]
             value: "{{ stream_slice.parent_id }}"
-          - path: ["extracted_at"]
+          - path: [extracted_at]
             value: "{{ now_utc() }}"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          job_uid:
+            type:
+              - "null"
+              - string
+          job_result_id:
+            type:
+              - "null"
+              - string
+          results:
+            type:
+              - "null"
+              - object
+          extracted_at:
+            type:
+              - "null"
+              - string
+            format: datetime
 streams:
   - "#/definitions/workspace_stream"
   - "#/definitions/workflows_stream"
@@ -146,7 +336,7 @@ streams:
 check:
   type: CheckStream
   stream_names:
-    - "workspace"
+    - workspace
 
 spec:
   type: Spec

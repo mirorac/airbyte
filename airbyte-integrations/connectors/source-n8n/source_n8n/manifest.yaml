@@ -1,12 +1,12 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     extractor:
-      field_path: ["data"]
+      field_path: [data]
   requester:
     url_base: "{{ config['host'] }}/api/v1"
-    http_method: "GET"
+    http_method: GET
     authenticator:
       type: ApiKeyAuthenticator
       header: X-N8N-API-KEY
@@ -19,16 +19,16 @@ definitions:
     paginator:
       type: DefaultPaginator
       page_size_option:
-        inject_into: "request_parameter"
+        inject_into: request_parameter
         field_name: ""
       pagination_strategy:
-        type: "CursorPagination"
+        type: CursorPagination
         cursor_value: "{{ response.nextCursor }}"
         page_size: 250
       page_token_option:
         type: RequestOption
-        field_name: "cursor"
-        inject_into: "request_parameter"
+        field_name: cursor
+        inject_into: request_parameter
     requester:
       $ref: "#/definitions/requester"
   base_stream:
@@ -37,13 +37,51 @@ definitions:
   executions_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "executions"
-      primary_key: "id"
-      path: "/executions"
+      name: executions
+      primary_key: id
+      path: /executions
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - integer
+          finished:
+            type:
+              - boolean
+          mode:
+            type:
+              - string
+          retryOf:
+            type:
+              - "null"
+              - string
+          retrySuccessId:
+            type:
+              - "null"
+              - integer
+          startedAt:
+            type:
+              - string
+          stoppedAt:
+            type:
+              - "null"
+              - string
+          workflowId:
+            type:
+              - "null"
+              - string
+          waitTill:
+            type:
+              - "null"
+              - string
 streams:
   - "#/definitions/executions_stream"
 
 check:
   stream_names:
-    - "executions"
+    - executions

@@ -1,22 +1,22 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     extractor:
       field_path: []
   requester:
-    url_base: "https://api.reply.io/v1/"
-    http_method: "GET"
+    url_base: https://api.reply.io/v1/
+    http_method: GET
     request_headers:
       x-api-key: "{{ config['api_key'] }}"
     error_handler:
-      type: "CompositeErrorHandler"
+      type: CompositeErrorHandler
       error_handlers:
         - response_filters:
             - predicate: "{{ 'Too much requests' in response }}"
               action: RETRY
           backoff_strategies:
-            - type: "ConstantBackoffStrategy"
+            - type: ConstantBackoffStrategy
               backoff_time_in_seconds: 15
   retriever:
     record_selector:
@@ -36,47 +36,225 @@ definitions:
         extractor:
           field_path: ["{{ parameters.name }}"]
       paginator:
-        type: "DefaultPaginator"
+        type: DefaultPaginator
         page_size_option:
-          inject_into: "request_parameter"
-          field_name: "limit"
+          inject_into: request_parameter
+          field_name: limit
         pagination_strategy:
-          type: "PageIncrement"
+          type: PageIncrement
           page_size: 1000
         page_token_option:
           type: RequestOption
-          inject_into: "request_parameter"
-          field_name: "page"
+          inject_into: request_parameter
+          field_name: page
 
   campaigns_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "campaigns"
-      primary_key: "id"
-      path: "/campaigns"
+      name: campaigns
+      primary_key: id
+      path: /campaigns
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          created:
+            type:
+              - "null"
+              - string
+            format: date-time
+          name:
+            type:
+              - "null"
+              - string
+          ownerEmail:
+            type:
+              - "null"
+              - string
+          deliveriesCount:
+            type:
+              - "null"
+              - integer
+          opensCount:
+            type:
+              - "null"
+              - integer
+          repliesCount:
+            type:
+              - "null"
+              - integer
+          bouncesCount:
+            type:
+              - "null"
+              - integer
+          optOutsCount:
+            type:
+              - "null"
+              - integer
+          outOfOfficeCount:
+            type:
+              - "null"
+              - integer
+          peopleCount:
+            type:
+              - "null"
+              - integer
+          peopleFinished:
+            type:
+              - "null"
+              - integer
+          peopleActive:
+            type:
+              - "null"
+              - integer
+          peoplePaused:
+            type:
+              - "null"
+              - integer
   email_accounts_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "email_accounts"
-      primary_key: "id"
-      path: "/emailAccounts"
+      name: email_accounts
+      primary_key: id
+      path: /emailAccounts
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          senderName:
+            type:
+              - "null"
+              - string
+          emailAddress:
+            type:
+              - "null"
+              - string
+          signature:
+            type:
+              - "null"
+              - string
   people_stream:
     $ref: "#/definitions/paginated_stream"
     $parameters:
-      name: "people"
-      primary_key: "id"
-      path: "/people"
+      name: people
+      primary_key: id
+      path: /people
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          email:
+            type:
+              - "null"
+              - string
+          firstName:
+            type:
+              - "null"
+              - string
+          lastName:
+            type:
+              - "null"
+              - string
+          company:
+            type:
+              - "null"
+              - string
+          city:
+            type:
+              - "null"
+              - string
+          state:
+            type:
+              - "null"
+              - string
+          country:
+            type:
+              - "null"
+              - string
+          timeZoneId:
+            type:
+              - "null"
+              - string
+          title:
+            type:
+              - "null"
+              - string
+          phone:
+            type:
+              - "null"
+              - string
+          phoneStatus:
+            type:
+              - "null"
+              - string
+          linkedInProfile:
+            type:
+              - "null"
+              - string
+          addingDate:
+            type:
+              - "null"
+              - string
+            format: date-time
+          customFields:
+            type:
+              - "null"
+              - array
   templates_stream:
     retriever:
       $ref: "#/definitions/base_stream/retriever"
       record_selector:
         extractor:
-          field_path: ["userTemplates"]
+          field_path: [userTemplates]
     $parameters:
-      name: "templates"
-      primary_key: "id"
-      path: "/templates"
+      name: templates
+      primary_key: id
+      path: /templates
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          body:
+            type:
+              - "null"
+              - string
+          subject:
+            type:
+              - "null"
+              - string
+          categoryId:
+            type:
+              - "null"
+              - string
 streams:
   - "#/definitions/campaigns_stream"
   - "#/definitions/email_accounts_stream"
@@ -85,4 +263,4 @@ streams:
 
 check:
   stream_names:
-    - "campaigns"
+    - campaigns

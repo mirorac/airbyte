@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
@@ -6,8 +6,8 @@ definitions:
       field_path:
         - results
   requester:
-    url_base: "https://gutendex.com/"
-    http_method: "GET"
+    url_base: https://gutendex.com/
+    http_method: GET
     request_parameters:
       author_year_start: "{{ config['author_year_start'] }}"
       author_year_end: "{{ config['author_year_end'] }}"
@@ -20,17 +20,17 @@ definitions:
     record_selector:
       $ref: "#/definitions/selector"
     paginator:
-      type: "DefaultPaginator"
+      type: DefaultPaginator
       pagination_strategy:
-        type: "PageIncrement"
+        type: PageIncrement
         page_size: 32
       page_token_option:
         type: RequestOption
-        inject_into: "request_parameter"
-        field_name: "page"
+        inject_into: request_parameter
+        field_name: page
       page_size_option:
-        inject_into: "body_data"
-        field_name: "page_size"
+        inject_into: body_data
+        field_name: page_size
     requester:
       $ref: "#/definitions/requester"
   base_stream:
@@ -39,12 +39,109 @@ definitions:
   books_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "books"
-      path: "/books"
+      name: books
+      path: /books
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-04/schema#
+        type: object
+        properties:
+          id:
+            type: integer
+          title:
+            type: string
+          authors:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                birth_year:
+                  type:
+                    - integer
+                    - "null"
+                death_year:
+                  type:
+                    - integer
+                    - "null"
+              required:
+                - name
+                - birth_year
+                - death_year
+          translators:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                birth_year:
+                  type:
+                    - integer
+                    - "null"
+                death_year:
+                  type:
+                    - integer
+                    - "null"
+              required:
+                - name
+                - birth_year
+                - death_year
+          subjects:
+            type: array
+            items:
+              type: string
+          bookshelves:
+            type: array
+            items:
+              type: string
+          languages:
+            type: array
+            items:
+              type: string
+          copyright:
+            type:
+              - boolean
+              - "null"
+          media_type:
+            type: string
+          formats:
+            type: object
+            properties:
+              image/jpeg:
+                type: string
+              application/x-mobipocket-ebook:
+                type: string
+              application/rdf+xml:
+                type: string
+              text/html:
+                type: string
+              application/epub+zip:
+                type: string
+              text/plain; charset=us-ascii:
+                type: string
+              application/octet-stream:
+                type: string
+          download_count:
+            type: integer
+        required:
+          - id
+          - title
+          - authors
+          - translators
+          - subjects
+          - bookshelves
+          - languages
+          - copyright
+          - media_type
+          - formats
+          - download_count
 streams:
   - "#/definitions/books_stream"
 
 check:
   stream_names:
-    - "books"
+    - books

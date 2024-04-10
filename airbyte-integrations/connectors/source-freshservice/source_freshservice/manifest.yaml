@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
@@ -8,10 +8,10 @@ definitions:
       field_path: ["{{ parameters.path_extractor }}"]
   requester:
     type: HttpRequester
-    url_base: "https://{{config['domain_name']}}/api/v2/"
-    http_method: "GET"
+    url_base: https://{{config['domain_name']}}/api/v2/
+    http_method: GET
     authenticator:
-      type: "BasicHttpAuthenticator"
+      type: BasicHttpAuthenticator
       username: "{{config['api_key']}}"
       password: ""
     error_handler:
@@ -23,28 +23,28 @@ definitions:
     record_selector:
       $ref: "#/definitions/selector"
     paginator:
-      type: "DefaultPaginator"
+      type: DefaultPaginator
       pagination_strategy:
-        type: "PageIncrement"
+        type: PageIncrement
         page_size: 30
         start_from_page: 1
       page_token_option:
-        type: "RequestOption"
-        inject_into: "request_parameter"
-        field_name: "page"
+        type: RequestOption
+        inject_into: request_parameter
+        field_name: page
     requester:
       $ref: "#/definitions/requester"
 
   incremental_base:
     type: DatetimeBasedCursor
-    cursor_field: "updated_at"
+    cursor_field: updated_at
     datetime_format: "%Y-%m-%dT%H:%M:%SZ"
     start_datetime:
       datetime: "{{ config['start_date'] }}"
       datetime_format: "%Y-%m-%dT%H:%M:%SZ"
     start_time_option:
-      field_name: "updated_since"
-      inject_into: "request_parameter"
+      field_name: updated_since
+      inject_into: request_parameter
 
   base_stream:
     type: DeclarativeStream
@@ -53,41 +53,263 @@ definitions:
 
   tickets_stream:
     $ref: "#/definitions/base_stream"
-    name: "tickets"
-    primary_key: "id"
+    name: tickets
+    primary_key: id
     incremental_sync:
       $ref: "#/definitions/incremental_base"
     $parameters:
-      path_extractor: "tickets"
-      path: "/tickets"
+      path_extractor: tickets
+      path: /tickets
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          attachments:
+            type:
+              - "null"
+              - array
+          cc_emails:
+            type:
+              - "null"
+              - array
+          department_id:
+            type:
+              - "null"
+              - integer
+          custom_fields:
+            type:
+              - "null"
+              - object
+          deleted:
+            type:
+              - "null"
+              - boolean
+          description:
+            type:
+              - "null"
+              - string
+          description_text:
+            type:
+              - "null"
+              - string
+          due_by:
+            type:
+              - "null"
+              - string
+          email:
+            type:
+              - "null"
+              - string
+          email_config_id:
+            type:
+              - "null"
+              - integer
+          fr_due_by:
+            type:
+              - "null"
+              - string
+          fr_escalated:
+            type:
+              - "null"
+              - boolean
+          fwd_emails:
+            type:
+              - "null"
+              - array
+          group_id:
+            type:
+              - "null"
+              - integer
+          id:
+            type: integer
+          is_escalated:
+            type:
+              - "null"
+              - boolean
+          name:
+            type:
+              - "null"
+              - string
+          phone:
+            type:
+              - "null"
+              - string
+          priority:
+            type:
+              - "null"
+              - integer
+          category:
+            type:
+              - "null"
+              - string
+          sub_category:
+            type:
+              - "null"
+              - string
+          item_category:
+            type:
+              - "null"
+              - string
+          reply_cc_emails:
+            type:
+              - "null"
+              - array
+          requester_id:
+            type:
+              - "null"
+              - integer
+          responder_id:
+            type:
+              - "null"
+              - integer
+          source:
+            type:
+              - "null"
+              - integer
+          spam:
+            type:
+              - "null"
+              - boolean
+          status:
+            type:
+              - "null"
+              - integer
+          subject:
+            type:
+              - "null"
+              - string
+          tags:
+            type:
+              - "null"
+              - array
+          to_emails:
+            type:
+              - "null"
+              - array
+          type:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          urgency:
+            type:
+              - "null"
+              - integer
+          impact:
+            type:
+              - "null"
+              - integer
+          workspace_id:
+            type:
+              - "null"
+              - integer
+          requested_for_id:
+            type:
+              - "null"
+              - integer
   satisfaction_survey_responses_stream:
-    name: "satisfaction_survey_responses"
-    primary_key: "id"
+    name: satisfaction_survey_responses
+    primary_key: id
     $parameters:
-      path_extractor: "csat_response"
+      path_extractor: csat_response
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
-        path: "tickets/{{ stream_slice.parent_id }}/csat_response"
+        path: tickets/{{ stream_slice.parent_id }}/csat_response
       partition_router:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/tickets_stream"
-            parent_key: "id"
-            partition_field: "parent_id"
+            parent_key: id
+            partition_field: parent_id
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          overall_rating:
+            type:
+              - "null"
+              - integer
+          overall_rating_text:
+            type:
+              - "null"
+              - string
+          primary_question:
+            type:
+              - "null"
+              - string
+          questionnaire_responses:
+            type:
+              - "null"
+              - object
+            items:
+              type:
+                - "null"
+                - object
+              additionalProperties: true
+              properties:
+                question:
+                  type:
+                    - "null"
+                    - object
+                  additionalProperties: true
+                  properties:
+                    question_text:
+                      type:
+                        - "null"
+                        - string
+                answers:
+                  type:
+                    - "null"
+                    - array
+                  items:
+                    - type:
+                        - "null"
+                        - object
+                      additionalProperties: true
+                      properties:
+                        answer_text:
+                          type:
+                            - "null"
+                            - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
   requested_items_stream:
-    name: "requested_items"
-    primary_key: "id"
+    name: requested_items
+    primary_key: id
     $parameters:
-      path_extractor: "requested_items"
+      path_extractor: requested_items
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
-        path: "tickets/{{ stream_slice.parent_id }}/requested_items"
+        path: tickets/{{ stream_slice.parent_id }}/requested_items
         error_handler:
           type: CompositeErrorHandler
           error_handlers:
@@ -102,104 +324,1271 @@ definitions:
                   action: RETRY
               backoff_strategies:
                 - type: WaitTimeFromHeader
-                  header: "Retry-After"
+                  header: Retry-After
       partition_router:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/tickets_stream"
-            parent_key: "id"
-            partition_field: "parent_id"
+            parent_key: id
+            partition_field: parent_id
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          quantity:
+            type:
+              - "null"
+              - integer
+          stage:
+            type:
+              - "null"
+              - integer
+          loaned:
+            type:
+              - "null"
+              - boolean
+          cost_per_request:
+            type:
+              - "null"
+              - number
+          remarks:
+            type:
+              - "null"
+              - string
+          delivery_time:
+            type:
+              - "null"
+              - number
+          is_parent:
+            type:
+              - "null"
+              - boolean
+          service_item_id:
+            type:
+              - "null"
+              - integer
+          service_item_name:
+            type:
+              - "null"
+              - string
+          custom_fields:
+            type:
+              - "null"
+              - object
+            additionalProperties: true
   problems_stream:
     $ref: "#/definitions/base_stream"
-    name: "problems"
-    primary_key: "id"
+    name: problems
+    primary_key: id
     $parameters:
-      path_extractor: "problems"
-      path: "/problems"
+      path_extractor: problems
+      path: /problems
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          agent_id:
+            type:
+              - "null"
+              - integer
+          requester_id:
+            type:
+              - "null"
+              - integer
+          group_id:
+            type:
+              - "null"
+              - integer
+          description:
+            type:
+              - "null"
+              - string
+          description_text:
+            type:
+              - "null"
+              - string
+          priority:
+            type:
+              - "null"
+              - integer
+          status:
+            type:
+              - "null"
+              - integer
+          impact:
+            type:
+              - "null"
+              - integer
+          known_error:
+            type:
+              - "null"
+              - boolean
+          subject:
+            type:
+              - "null"
+              - string
+          due_by:
+            type:
+              - "null"
+              - string
+          department_id:
+            type:
+              - "null"
+              - integer
+          category:
+            type:
+              - "null"
+              - string
+          sub_category:
+            type:
+              - "null"
+              - string
+          item_category:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          updated_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          associated_change:
+            type:
+              - "null"
+              - integer
+          custom_fields:
+            type:
+              - "null"
+              - object
+            additionalProperties: true
+          analysis_fields:
+            type: object
+            additionalProperties: true
+          planned_start_date:
+            type:
+              - "null"
+              - string
+            format: date-time
+          planned_end_date:
+            type:
+              - "null"
+              - string
+            format: date-time
+          planned_effort:
+            type:
+              - string
+              - "null"
+          attachments:
+            type:
+              - "null"
+              - array
+            items:
+              additionalProperties: true
+          workspace_id:
+            type:
+              - "null"
+              - integer
+          assets:
+            type:
+              - "null"
+              - array
+            items:
+              additionalProperties: true
   changes_stream:
     $ref: "#/definitions/base_stream"
-    name: "changes"
-    primary_key: "id"
+    name: changes
+    primary_key: id
     $parameters:
-      path_extractor: "changes"
-      path: "/changes"
+      path_extractor: changes
+      path: /changes
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          agent_id:
+            type:
+              - "null"
+              - integer
+          description:
+            type:
+              - "null"
+              - string
+          description_text:
+            type:
+              - "null"
+              - string
+          requester_id:
+            type:
+              - "null"
+              - integer
+          group_id:
+            type:
+              - "null"
+              - integer
+          priority:
+            type:
+              - "null"
+              - integer
+          impact:
+            type:
+              - "null"
+              - integer
+          status:
+            type:
+              - "null"
+              - integer
+          risk:
+            type:
+              - "null"
+              - integer
+          change_type:
+            type:
+              - "null"
+              - integer
+          approval_status:
+            type:
+              - "null"
+              - integer
+          planned_start_date:
+            type:
+              - "null"
+              - string
+          planned_end_date:
+            type:
+              - "null"
+              - string
+          subject:
+            type:
+              - "null"
+              - string
+          department_id:
+            type:
+              - "null"
+              - integer
+          category:
+            type:
+              - "null"
+              - string
+          sub_category:
+            type:
+              - "null"
+              - string
+          item_category:
+            type:
+              - "null"
+              - string
+          custom_fields:
+            type:
+              - "null"
+              - object
+            additionalProperties: true
+          maintenance_window:
+            type:
+              - "null"
+              - object
+            additionalProperties: true
+          blackout_window:
+            type:
+              - "null"
+              - object
+            additionalProperties: true
+          created_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          updated_at:
+            type:
+              - "null"
+              - string
+            format: date-time
+          planned_effort:
+            type:
+              - string
+              - "null"
+          attachments:
+            type:
+              - "null"
+              - array
+            items:
+              additionalProperties: true
+          impacted_services:
+            type:
+              - "null"
+              - array
+            items:
+              additionalProperties: true
+          workspace_id:
+            type:
+              - "null"
+              - integer
+          change_window_id:
+            type:
+              - "null"
+              - integer
+          assets:
+            type:
+              - "null"
+              - array
+            items:
+              additionalProperties: true
   releases_stream:
     $ref: "#/definitions/base_stream"
-    name: "releases"
-    primary_key: "id"
+    name: releases
+    primary_key: id
     incremental_sync:
       $ref: "#/definitions/incremental_base"
     $parameters:
-      path_extractor: "releases"
-      path: "/changes"
+      path_extractor: releases
+      path: /changes
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: integer
+          agent_id:
+            type:
+              - "null"
+              - integer
+          group_id:
+            type:
+              - "null"
+              - integer
+          priority:
+            type:
+              - "null"
+              - integer
+          status:
+            type:
+              - "null"
+              - integer
+          release_type:
+            type:
+              - "null"
+              - integer
+          subject:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          planned_start_date:
+            type:
+              - "null"
+              - string
+          planned_end_date:
+            type:
+              - "null"
+              - string
+          work_start_date:
+            type:
+              - "null"
+              - string
+          work_end_date:
+            type:
+              - "null"
+              - string
+          department_id:
+            type:
+              - "null"
+              - integer
+          category:
+            type:
+              - "null"
+              - string
+          sub_category:
+            type:
+              - "null"
+              - string
+          item_category:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          associated_assets:
+            type:
+              - "null"
+              - array
+          associated_changes:
+            type:
+              - "null"
+              - array
+          custom_fields:
+            type:
+              - "null"
+              - object
+          planning_fields:
+            type: object
   requesters_stream:
     $ref: "#/definitions/base_stream"
-    name: "requesters"
-    primary_key: "id"
+    name: requesters
+    primary_key: id
     $parameters:
-      path_extractor: "requesters"
-      path: "/requesters"
+      path_extractor: requesters
+      path: /requesters
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          first_name:
+            type:
+              - "null"
+              - string
+          last_name:
+            type:
+              - "null"
+              - string
+          job_title:
+            type:
+              - "null"
+              - string
+          primary_email:
+            type:
+              - "null"
+              - string
+          secondary_emails:
+            type:
+              - "null"
+              - array
+          work_phone_number:
+            type:
+              - "null"
+              - string
+          mobile_phone_number:
+            type:
+              - "null"
+              - string
+          department_ids:
+            type:
+              - "null"
+              - array
+          can_see_all_tickets_from_associated_departments:
+            type:
+              - "null"
+              - boolean
+          reporting_manager_id:
+            type:
+              - "null"
+              - integer
+          address:
+            type:
+              - "null"
+              - string
+          time_zone:
+            type:
+              - "null"
+              - string
+          time_format:
+            type:
+              - "null"
+              - string
+          language:
+            type:
+              - "null"
+              - string
+          location_id:
+            type:
+              - "null"
+              - integer
+          background_information:
+            type:
+              - "null"
+              - string
+          custom_fields:
+            type:
+              - "null"
+              - object
+          active:
+            type:
+              - "null"
+              - boolean
+          has_logged_in:
+            type:
+              - "null"
+              - boolean
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          is_agent:
+            type:
+              - "null"
+              - boolean
+          department_names:
+            type:
+              - "null"
+              - array
+          vip_user:
+            type:
+              - "null"
+              - boolean
+          external_id:
+            type:
+              - "null"
+              - string
+          can_see_all_changes_from_associated_departments:
+            type:
+              - "null"
+              - boolean
+          location_name:
+            type:
+              - "null"
+              - string
+          work_schedule_id:
+            type:
+              - "null"
+              - integer
   agents_stream:
     $ref: "#/definitions/base_stream"
-    name: "agents"
-    primary_key: "id"
+    name: agents
+    primary_key: id
     $parameters:
-      path_extractor: "agents"
-      path: "/agents"
+      path_extractor: agents
+      path: /agents
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          first_name:
+            type:
+              - "null"
+              - string
+          last_name:
+            type:
+              - "null"
+              - string
+          occasional:
+            type:
+              - "null"
+              - boolean
+          job_title:
+            type:
+              - "null"
+              - string
+          email:
+            type:
+              - "null"
+              - string
+          work_phone_number:
+            type:
+              - "null"
+              - string
+          mobile_phone_number:
+            type:
+              - "null"
+              - string
+          member_of_pending_approval:
+            type:
+              - "null"
+              - array
+          observer_of_pending_approval:
+            type:
+              - "null"
+              - array
+          department_ids:
+            type:
+              - "null"
+              - array
+          can_see_all_tickets_from_associated_departments:
+            type:
+              - "null"
+              - boolean
+          reporting_manager_id:
+            type:
+              - "null"
+              - integer
+          address:
+            type:
+              - "null"
+              - string
+          time_zone:
+            type:
+              - "null"
+              - string
+          time_format:
+            type:
+              - "null"
+              - string
+          language:
+            type:
+              - "null"
+              - string
+          location_id:
+            type:
+              - "null"
+              - integer
+          background_information:
+            type:
+              - "null"
+              - string
+          scoreboard_level_id:
+            type:
+              - "null"
+              - integer
+          scoreboard_points:
+            type:
+              - "null"
+              - integer
+          ticket_scope:
+            type:
+              - "null"
+              - string
+          problem_scope:
+            type:
+              - "null"
+              - string
+          change_scope:
+            type:
+              - "null"
+              - string
+          release_scope:
+            type:
+              - "null"
+              - string
+          group_ids:
+            type:
+              - "null"
+              - array
+          member_of:
+            type:
+              - "null"
+              - array
+          observer_of:
+            type:
+              - "null"
+              - array
+          role_ids:
+            type:
+              - "null"
+              - array
+          roles:
+            type:
+              - "null"
+              - array
+          last_login_at:
+            type:
+              - "null"
+              - string
+          last_active_at:
+            type:
+              - "null"
+              - string
+          custom_fields:
+            type:
+              - "null"
+              - object
+          has_logged_in:
+            type:
+              - "null"
+              - boolean
+          active:
+            type:
+              - "null"
+              - boolean
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          location_name:
+            type:
+              - "null"
+              - string
+          department_names:
+            type:
+              - "null"
+              - array
+          scopes:
+            type:
+              - "null"
+              - object
+          auto_assign_status_changed_at:
+            type:
+              - "null"
+              - string
+          workspace_id:
+            type:
+              - "null"
+              - integer
+          signature:
+            type:
+              - "null"
+              - string
+          vip_user:
+            type:
+              - "null"
+              - boolean
+          auto_assign_tickets:
+            type:
+              - "null"
+              - boolean
+          external_id:
+            type:
+              - "null"
+              - string
+          workspace_ids:
+            type:
+              - "null"
+              - array
+          workspace_info:
+            type:
+              - "null"
+              - array
+            items:
+              additionalProperties: true
+          work_schedule_id:
+            type:
+              - "null"
+              - integer
   locations_stream:
     $ref: "#/definitions/base_stream"
-    name: "locations"
-    primary_key: "id"
+    name: locations
+    primary_key: id
     $parameters:
-      path_extractor: "locations"
-      path: "/locations"
+      path_extractor: locations
+      path: /locations
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          name:
+            type:
+              - "null"
+              - string
+          parent_location_id:
+            type:
+              - "null"
+              - integer
+          primary_contact_id:
+            type:
+              - "null"
+              - integer
+          address:
+            type: object
+            additionalProperties: true
+            properties:
+              line1:
+                type:
+                  - "null"
+                  - string
+              line2:
+                type:
+                  - "null"
+                  - string
+              city:
+                type:
+                  - "null"
+                  - string
+              state:
+                type:
+                  - "null"
+                  - string
+              country:
+                type:
+                  - "null"
+                  - string
+              zipcode:
+                type:
+                  - "null"
+                  - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          email:
+            type:
+              - "null"
+              - string
+          phone:
+            type:
+              - "null"
+              - string
+          contact_name:
+            type:
+              - "null"
+              - string
   products_stream:
     $ref: "#/definitions/base_stream"
-    name: "products"
-    primary_key: "id"
+    name: products
+    primary_key: id
     $parameters:
-      path_extractor: "products"
-      path: "/products"
+      path_extractor: products
+      path: /products
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type:
+              - "null"
+              - string
+          asset_type_id:
+            type:
+              - "null"
+              - integer
+          manufacturer:
+            type:
+              - "null"
+              - string
+          status:
+            type:
+              - "null"
+              - string
+          mode_of_procurement:
+            type:
+              - "null"
+              - string
+          depreciation_type_id:
+            type:
+              - "null"
+              - integer
+          description:
+            type:
+              - "null"
+              - string
+          description_text:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
   vendors_stream:
     $ref: "#/definitions/base_stream"
-    name: "vendors"
-    primary_key: "id"
+    name: vendors
+    primary_key: id
     $parameters:
-      path_extractor: "vendors"
-      path: "/vendors"
+      path_extractor: vendors
+      path: /vendors
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          name:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          contact_name:
+            type:
+              - "null"
+              - string
+          mobile:
+            type:
+              - "null"
+              - integer
+          phone:
+            type:
+              - "null"
+              - integer
+          primary_contact_id:
+            type:
+              - "null"
+              - integer
+          email:
+            type:
+              - "null"
+              - string
+          custom_fields:
+            type:
+              - "null"
+              - object
+          address:
+            type: object
+            additionalProperties: true
+            properties:
+              line1:
+                type:
+                  - "null"
+                  - string
+              city:
+                type:
+                  - "null"
+                  - string
+              state:
+                type:
+                  - "null"
+                  - string
+              country:
+                type:
+                  - "null"
+                  - string
+              zipcode:
+                type:
+                  - "null"
+                  - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
   assets_stream:
     $ref: "#/definitions/base_stream"
-    name: "assets"
-    primary_key: "id"
+    name: assets
+    primary_key: id
     $parameters:
-      path_extractor: "assets"
-      path: "/assets"
+      path_extractor: assets
+      path: /assets
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          display_id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          asset_type_id:
+            type:
+              - "null"
+              - integer
+          asset_tag:
+            type:
+              - "null"
+              - string
+          impact:
+            type:
+              - "null"
+              - string
+          author_type:
+            type:
+              - "null"
+              - string
+          usage_type:
+            type:
+              - "null"
+              - string
+          user_id:
+            type:
+              - "null"
+              - integer
+          location_id:
+            type:
+              - "null"
+              - integer
+          department_id:
+            type:
+              - "null"
+              - integer
+          agent_id:
+            type:
+              - "null"
+              - integer
+          group_id:
+            type:
+              - "null"
+              - integer
+          assigned_on:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          discovery_enabled:
+            type:
+              - "null"
+              - boolean
+          end_of_life:
+            type:
+              - "null"
+              - string
+            format: "%Y-%m-%d"
   software_stream:
     $ref: "#/definitions/base_stream"
-    name: "software"
-    primary_key: "id"
+    name: software
+    primary_key: id
     $parameters:
-      path_extractor: "applications"
-      path: "/applications"
+      path_extractor: applications
+      path: /applications
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          name:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          application_type:
+            type:
+              - "null"
+              - string
+          status:
+            type:
+              - "null"
+              - string
+          publisher_id:
+            type:
+              - "null"
+              - integer
+          managed_by_id:
+            type:
+              - "null"
+              - integer
+          notes:
+            type:
+              - "null"
+              - string
+          category:
+            type:
+              - "null"
+              - string
+          sources:
+            type:
+              - "null"
+              - array
+            items:
+              additionalProperties: true
+          user_count:
+            type:
+              - "null"
+              - integer
+          installation_count:
+            type:
+              - "null"
+              - integer
+          workspace_id:
+            type:
+              - "null"
+              - integer
+          additional_data:
+            type:
+              - "null"
+              - object
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
   purchase_orders_stream:
     $ref: "#/definitions/base_stream"
-    name: "purchase_orders"
-    primary_key: "id"
+    name: purchase_orders
+    primary_key: id
     $parameters:
-      path_extractor: "purchase_orders"
-      path: "/purchase_orders"
+      path_extractor: purchase_orders
+      path: /purchase_orders
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: integer
+          vendor_id:
+            type:
+              - "null"
+              - integer
+          name:
+            type:
+              - "null"
+              - string
+          po_number:
+            type:
+              - "null"
+              - string
+          vendor_details:
+            type:
+              - "null"
+              - string
+          expected_delivery_date:
+            type:
+              - "null"
+              - string
+          created_at:
+            type:
+              - "null"
+              - string
+          updated_at:
+            type:
+              - "null"
+              - string
+          created_by:
+            type:
+              - "null"
+              - integer
+          status:
+            type:
+              - "null"
+              - integer
+          shipping_address:
+            type:
+              - "null"
+              - string
+          billing_same_as_shipping:
+            type:
+              - "null"
+              - integer
+          billing_address:
+            type:
+              - "null"
+              - string
+          currency_code:
+            type:
+              - "null"
+              - string
+          conversion_rate:
+            type: number
+          department_id:
+            type:
+              - "null"
+              - integer
+          discount_percentage:
+            type:
+              - "null"
+              - integer
+          tax_percentage:
+            type:
+              - "null"
+              - integer
+          shipping_cost:
+            type:
+              - "null"
+              - integer
+          workspace_id:
+            type:
+              - "null"
+              - integer
+          total_cost:
+            type:
+              - "null"
+              - number
+          custom_fields:
+            type:
+              - "null"
+              - object
+          purchase_items:
+            type: array
 streams:
   - "#/definitions/tickets_stream"
   - "#/definitions/satisfaction_survey_responses_stream"
@@ -219,4 +1608,4 @@ streams:
 check:
   type: CheckStream
   stream_names:
-    - "tickets"
+    - tickets

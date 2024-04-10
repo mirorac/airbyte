@@ -1,12 +1,12 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     extractor:
       field_path: []
   requester:
-    url_base: "https://api.smartengage.com"
-    http_method: "GET"
+    url_base: https://api.smartengage.com
+    http_method: GET
     # API Docs: https://smartengage.com/docs/#authentication
     authenticator:
       type: BearerAuthenticator
@@ -25,22 +25,47 @@ definitions:
   avatars_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "avatars"
-      primary_key: "avatar_id"
-      path: "/avatars/list"
+      name: avatars
+      primary_key: avatar_id
+      path: /avatars/list
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        type: object
+        properties:
+          brand_name:
+            type:
+              - string
+              - "null"
+          avatar_id:
+            type: string
+          brand_image:
+            type:
+              - string
+              - "null"
+          user_role:
+            type:
+              - string
+              - "null"
+          facebook_page_id:
+            type:
+              - string
+              - "null"
+        required:
+          - avatar_id
   avatars_partition_router:
     type: SubstreamPartitionRouter
     parent_stream_configs:
       - stream: "#/definitions/avatars_stream"
-        parent_key: "avatar_id"
-        partition_field: "avatar_id"
+        parent_key: avatar_id
+        partition_field: avatar_id
   # API Docs: https://smartengage.com/docs/#list-all-tags
   tags_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "tags"
-      primary_key: "tag_id"
-      path: "/tags/list"
+      name: tags
+      primary_key: tag_id
+      path: /tags/list
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -49,13 +74,26 @@ definitions:
           avatar_id: "{{ stream_slice.avatar_id }}"
       partition_router:
         $ref: "#/definitions/avatars_partition_router"
-  # API Docs: https://smartengage.com/docs/#list-all-custom-fields
+    # API Docs: https://smartengage.com/docs/#list-all-custom-fields
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        type: object
+        properties:
+          tag_id:
+            type: string
+          tag_name:
+            type:
+              - string
+              - "null"
+        required:
+          - tag_id
   custom_fields_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "custom_fields"
-      primary_key: "custom_field_id"
-      path: "/customfields/list"
+      name: custom_fields
+      primary_key: custom_field_id
+      path: /customfields/list
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -64,13 +102,26 @@ definitions:
           avatar_id: "{{ stream_slice.avatar_id }}"
       partition_router:
         $ref: "#/definitions/avatars_partition_router"
-  # API Docs: https://smartengage.com/docs/#list-all-sequences
+    # API Docs: https://smartengage.com/docs/#list-all-sequences
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        type: object
+        properties:
+          custom_field_id:
+            type: string
+          custom_field_name:
+            type:
+              - string
+              - "null"
+        required:
+          - custom_field_id
   sequences_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "sequences"
-      primary_key: "sequence_id"
-      path: "/sequences/list"
+      name: sequences
+      primary_key: sequence_id
+      path: /sequences/list
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -80,6 +131,19 @@ definitions:
       partition_router:
         $ref: "#/definitions/avatars_partition_router"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        type: object
+        properties:
+          sequence_id:
+            type: string
+          sequence_name:
+            type:
+              - string
+              - "null"
+        required:
+          - sequence_id
 streams:
   - "#/definitions/avatars_stream"
   - "#/definitions/tags_stream"
@@ -87,4 +151,4 @@ streams:
   - "#/definitions/sequences_stream"
 
 check:
-  stream_names: ["tags"]
+  stream_names: [tags]

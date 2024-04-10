@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   ringcentral_extractor:
@@ -12,8 +12,8 @@ definitions:
 
   requester:
     type: HttpRequester
-    url_base: "https://platform.devtest.ringcentral.com/restapi/v1.0"
-    http_method: "GET"
+    url_base: https://platform.devtest.ringcentral.com/restapi/v1.0
+    http_method: GET
     authenticator:
       type: BearerAuthenticator
       api_token: "{{ config['auth_token'] }}"
@@ -25,18 +25,18 @@ definitions:
       record_selector:
         $ref: "#/definitions/selector"
       paginator:
-        type: "DefaultPaginator"
+        type: DefaultPaginator
         page_size_option:
-          type: "RequestOption"
-          inject_into: "request_parameter"
-          field_name: "perPage"
+          type: RequestOption
+          inject_into: request_parameter
+          field_name: perPage
         pagination_strategy:
-          type: "PageIncrement"
+          type: PageIncrement
           page_size: 100
         page_token_option:
-          type: "RequestOption"
-          inject_into: "request_parameter"
-          field_name: "page"
+          type: RequestOption
+          inject_into: request_parameter
+          field_name: page
       requester:
         $ref: "#/definitions/requester"
 
@@ -47,118 +47,809 @@ definitions:
       record_selector:
         $ref: "#/definitions/selector"
       paginator:
-        type: "NoPagination"
+        type: NoPagination
       requester:
         $ref: "#/definitions/requester"
 
   user_business_hours_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/extension/{{ config['extension_id'] }}/business-hours"
-      extractorPath: "schedule"
+      path:
+        /account/{{ config['account_id'] }}/extension/{{ config['extension_id']
+        }}/business-hours
+      extractorPath: schedule
     $ref: "#/definitions/base_stream_without_pagination"
-    name: "user_business_hours"
+    name: user_business_hours
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: User business hours Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          weeklyRanges:
+            type:
+              - "null"
+              - object
+            properties:
+              monday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              tuesday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              wednesday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              thursday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              friday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
   company_business_hours_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/business-hours"
-      extractorPath: "schedule"
+      path: /account/{{ config['account_id'] }}/business-hours
+      extractorPath: schedule
     $ref: "#/definitions/base_stream_without_pagination"
-    name: "company_business_hours"
+    name: company_business_hours
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Business hours Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          weeklyRanges:
+            type:
+              - "null"
+              - object
+            properties:
+              monday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              tuesday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              wednesday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              thursday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
+              friday:
+                type:
+                  - "null"
+                  - array
+                items:
+                  type:
+                    - "null"
+                    - object
+                  properties:
+                    from:
+                      type:
+                        - "null"
+                        - string
+                    to:
+                      type:
+                        - "null"
+                        - string
   callblock_settings_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/extension/{{ config['extension_id'] }}/caller-blocking"
-      extractorPath: "greetings"
+      path:
+        /account/{{ config['account_id'] }}/extension/{{ config['extension_id']
+        }}/caller-blocking
+      extractorPath: greetings
     $ref: "#/definitions/base_stream_without_pagination"
-    name: "callblock_settings"
+    name: callblock_settings
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Callblock settings Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          type:
+            type:
+              - "null"
+              - string
+          preset:
+            type:
+              - "null"
+              - object
+            properties:
+              uri:
+                type:
+                  - "null"
+                  - string
+              id:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
   blocked_allowed_phonenumbers_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/extension/{{ config['extension_id'] }}/caller-blocking/phone-numbers"
-      extractorPath: "records"
+      path:
+        /account/{{ config['account_id'] }}/extension/{{ config['extension_id']
+        }}/caller-blocking/phone-numbers
+      extractorPath: records
     $ref: "#/definitions/base_stream_without_pagination"
-    primary_key: "id"
-    name: "blocked_allowed_phonenumbers"
+    primary_key: id
+    name: blocked_allowed_phonenumbers
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Blocked_Allowed phoneNumber Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          uri:
+            type:
+              - "null"
+              - string
+          id:
+            type:
+              - "null"
+              - string
+          phoneNumber:
+            type:
+              - "null"
+              - string
+          status:
+            type:
+              - "null"
+              - string
+          label:
+            type:
+              - "null"
+              - string
   forwarding_numbers_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/extension/{{ config['extension_id'] }}/forwarding-number"
-      extractorPath: "records"
+      path:
+        /account/{{ config['account_id'] }}/extension/{{ config['extension_id']
+        }}/forwarding-number
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "forwarding_numbers"
+    primary_key: id
+    name: forwarding_numbers
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Forwarding numbers Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          phoneNumber:
+            type:
+              - "null"
+              - string
+          label:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          features:
+            type:
+              - "null"
+              - array
+            items:
+              type:
+                - "null"
+                - string
+          flipNumber:
+            type:
+              - "null"
+              - string
   company_call_handling_rules_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/answering-rule"
-      extractorPath: "records"
+      path: /account/{{ config['account_id'] }}/answering-rule
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "company_call_handling_rules"
+    primary_key: id
+    name: company_call_handling_rules
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Company call handling rules
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          uri:
+            type:
+              - "null"
+              - string
+          id:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          enabled:
+            type:
+              - "null"
+              - boolean
   user_call_records_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/extension/{{ config['extension_id'] }}/call-log"
-      extractorPath: "records"
+      path:
+        /account/{{ config['account_id'] }}/extension/{{ config['extension_id']
+        }}/call-log
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "user_call_records"
+    primary_key: id
+    name: user_call_records
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: User Call Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          uri:
+            type:
+              - "null"
+              - string
+          id:
+            type:
+              - "null"
+              - string
+          sessionId:
+            type:
+              - "null"
+              - string
+          telephonySessionId:
+            type:
+              - "null"
+              - string
+          startTime:
+            type:
+              - "null"
+              - string
+          duration:
+            type:
+              - "null"
+              - number
+          type:
+            type:
+              - "null"
+              - string
+          direction:
+            type:
+              - "null"
+              - string
+          action:
+            type:
+              - "null"
+              - string
+          result:
+            type:
+              - "null"
+              - string
+          to:
+            type:
+              - "null"
+              - object
+            properties:
+              phoneNumber:
+                type:
+                  - "null"
+                  - string
+              location:
+                type:
+                  - "null"
+                  - string
+          from:
+            type:
+              - "null"
+              - object
+            properties:
+              phoneNumber:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
+          message:
+            type:
+              - "null"
+              - object
+            properties:
+              uri:
+                type:
+                  - "null"
+                  - string
+              id:
+                type:
+                  - "null"
+                  - string
+              type:
+                type:
+                  - "null"
+                  - string
   user_active_calls_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/extension/{{ config['extension_id'] }}/active-calls"
-      extractorPath: "records"
+      path:
+        /account/{{ config['account_id'] }}/extension/{{ config['extension_id']
+        }}/active-calls
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "user_active_calls"
+    primary_key: id
+    name: user_active_calls
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: User Call Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          uri:
+            type:
+              - "null"
+              - string
+          id:
+            type:
+              - "null"
+              - string
+          sessionId:
+            type:
+              - "null"
+              - string
+          telephonySessionId:
+            type:
+              - "null"
+              - string
+          startTime:
+            type:
+              - "null"
+              - string
+          duration:
+            type:
+              - "null"
+              - number
+          type:
+            type:
+              - "null"
+              - string
+          direction:
+            type:
+              - "null"
+              - string
+          action:
+            type:
+              - "null"
+              - string
+          result:
+            type:
+              - "null"
+              - string
+          to:
+            type:
+              - "null"
+              - object
+            properties:
+              phoneNumber:
+                type:
+                  - "null"
+                  - string
+              location:
+                type:
+                  - "null"
+                  - string
+          from:
+            type:
+              - "null"
+              - object
+            properties:
+              phoneNumber:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
+          message:
+            type:
+              - "null"
+              - object
+            properties:
+              uri:
+                type:
+                  - "null"
+                  - string
+              id:
+                type:
+                  - "null"
+                  - string
+              type:
+                type:
+                  - "null"
+                  - string
   call_monitoring_groups_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/call-monitoring-groups"
-      extractorPath: "records"
+      path: /account/{{ config['account_id'] }}/call-monitoring-groups
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "call_monitoring_groups"
+    primary_key: id
+    name: call_monitoring_groups
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Call Monitoring Groups Schema
+        additionalProperties: true
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
   call_queues_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/call-queues"
-      extractorPath: "records"
+      path: /account/{{ config['account_id'] }}/call-queues
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "call_queues"
+    primary_key: id
+    name: call_queues
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Call Queues Schema
+        additionalProperties: true
+        type: object
+        properties:
+          uri:
+            type:
+              - "null"
+              - string
+          id:
+            type:
+              - "null"
+              - string
+          extensionNumber:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
   call_record_settings_stream:
     $parameters:
-      path: "/account/{{ config['account_id'] }}/call-recording"
-      extractorPath: "greetings"
+      path: /account/{{ config['account_id'] }}/call-recording
+      extractorPath: greetings
     $ref: "#/definitions/base_stream_without_pagination"
-    name: "call_record_settings"
+    name: call_record_settings
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Call Record Settings Schema
+        additionalProperties: true
+        type: object
+        properties:
+          type:
+            type:
+              - "null"
+              - string
+          mode:
+            type:
+              - "null"
+              - string
   greetings_stream:
     $parameters:
-      path: "/dictionary/greeting"
-      extractorPath: "records"
+      path: /dictionary/greeting
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "greetings"
+    primary_key: id
+    name: greetings
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Greetings Schema
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          uri:
+            type:
+              - "null"
+              - string
+          id:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          usageType:
+            type:
+              - "null"
+              - string
+          contentUri:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          category:
+            type:
+              - "null"
+              - string
+          text:
+            type:
+              - "null"
+              - string
   ivr_prompts_stream:
     $parameters:
-      path: "/dictionary/greeting"
-      extractorPath: "records"
+      path: /dictionary/greeting
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "ivr_prompts"
+    primary_key: id
+    name: ivr_prompts
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: IVR Prompts
+        additionalProperties: true
+        type:
+          - "null"
+          - object
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          uri:
+            type:
+              - "null"
+              - string
+          contentType:
+            type:
+              - "null"
+              - string
+          filename:
+            type:
+              - "null"
+              - string
+          contentUri:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          text:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          usageType:
+            type:
+              - "null"
+              - string
+          category:
+            type:
+              - "null"
+              - string
   fax_cover_stream:
     $parameters:
-      path: "/dictionary/fax-cover-page"
-      extractorPath: "records"
+      path: /dictionary/fax-cover-page
+      extractorPath: records
     $ref: "#/definitions/base_stream"
-    primary_key: "id"
-    name: "fax_cover"
+    primary_key: id
+    name: fax_cover
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Fax Cover Schema
+        additionalProperties: true
+        type: object
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
 streams:
   - "#/definitions/user_business_hours_stream"
   - "#/definitions/company_business_hours_stream"
@@ -178,17 +869,17 @@ streams:
 check:
   type: CheckStream
   stream_names:
-    - "user_business_hours"
-    - "company_business_hours"
-    - "callblock_settings"
-    - "blocked_allowed_phonenumbers"
-    - "forwarding_numbers"
-    - "company_call_handling_rules"
-    - "user_call_records"
-    - "user_active_calls"
-    - "call_monitoring_groups"
-    - "call_queues"
-    - "call_record_settings"
-    - "greetings"
-    - "ivr_prompts"
-    - "fax_cover"
+    - user_business_hours
+    - company_business_hours
+    - callblock_settings
+    - blocked_allowed_phonenumbers
+    - forwarding_numbers
+    - company_call_handling_rules
+    - user_call_records
+    - user_active_calls
+    - call_monitoring_groups
+    - call_queues
+    - call_record_settings
+    - greetings
+    - ivr_prompts
+    - fax_cover

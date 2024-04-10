@@ -1,16 +1,16 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     type: RecordSelector
     extractor:
       type: DpathExtractor
-      field_path: ["items"]
+      field_path: [items]
 
   requester:
     type: HttpRequester
-    url_base: "https://coda.io/apis/v1/"
-    http_method: "GET"
+    url_base: https://coda.io/apis/v1/
+    http_method: GET
     authenticator:
       type: BearerAuthenticator
       api_token: "{{ config['auth_token'] }}"
@@ -34,15 +34,15 @@ definitions:
       type: SubstreamPartitionRouter
       parent_stream_configs:
         - stream: "#/definitions/docs_stream"
-          parent_key: "id"
-          partition_field: "doc_id"
+          parent_key: id
+          partition_field: doc_id
 
   rows_partition_router:
     type: SubstreamPartitionRouter
     parent_stream_configs:
       - stream: "#/definitions/tables_stream"
-        parent_key: "id"
-        partition_field: "table_id"
+        parent_key: id
+        partition_field: table_id
 
   parent_base_stream:
     type: DeclarativeStream
@@ -50,37 +50,245 @@ definitions:
       $ref: "#/definitions/retriever"
 
   base_paginator:
-    type: "DefaultPaginator"
+    type: DefaultPaginator
     pagination_strategy:
-      type: "CursorPagination"
+      type: CursorPagination
       cursor_value: "{{ last_records['href'] }}"
     page_token_option:
-      type: "RequestPath"
-      field_name: "from"
-      inject_into: "url_base"
+      type: RequestPath
+      field_name: from
+      inject_into: url_base
 
   docs_stream:
     $ref: "#/definitions/parent_base_stream"
     $parameters:
-      name: "docs"
-      primary_key: "id"
-      path: "docs"
+      name: docs
+      primary_key: id
+      path: docs
     retriever:
       $ref: "#/definitions/retriever"
       paginator:
         $ref: "#/definitions/base_paginator"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type:
+          - "null"
+          - object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          href:
+            type:
+              - "null"
+              - string
+          browserLink:
+            type:
+              - "null"
+              - string
+          icon:
+            type:
+              - "null"
+              - object
+            properties:
+              name:
+                type:
+                  - "null"
+                  - string
+              type:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+          name:
+            type:
+              - "null"
+              - string
+          owner:
+            type:
+              - "null"
+              - string
+          ownerName:
+            type:
+              - "null"
+              - string
+          docSize:
+            type:
+              - "null"
+              - object
+            properties:
+              totalRowCount:
+                type:
+                  - "null"
+                  - integer
+              tableViewCount:
+                type:
+                  - "null"
+                  - integer
+              pageCount:
+                type:
+                  - "null"
+                  - integer
+              overApiSizeLimit:
+                type:
+                  - "null"
+                  - boolean
+          sourceDoc:
+            type:
+              - "null"
+              - object
+            properties:
+              totalRowCount:
+                type:
+                  - "null"
+                  - string
+              type:
+                type:
+                  - "null"
+                  - string
+              href:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+          createdAt:
+            type:
+              - "null"
+              - string
+          updatedAt:
+            type:
+              - "null"
+              - string
+          published:
+            type:
+              - "null"
+              - object
+            properties:
+              description:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+              imageLink:
+                type:
+                  - "null"
+                  - string
+              discoverable:
+                type:
+                  - "null"
+                  - boolean
+              earnCredit:
+                type:
+                  - "null"
+                  - boolean
+              mode:
+                type:
+                  - "null"
+                  - string
+              categories:
+                type:
+                  - "null"
+                  - string
+                items:
+                  type:
+                    - "null"
+                    - string
+          folder:
+            type:
+              - "null"
+              - object
+            properties:
+              id:
+                type:
+                  - "null"
+                  - string
+              type:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
+          workspace:
+            type:
+              - "null"
+              - object
+            properties:
+              id:
+                type:
+                  - "null"
+                  - string
+              type:
+                type:
+                  - "null"
+                  - string
+              organizationId:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
+          workspaceId:
+            type:
+              - "null"
+              - string
+          folderId:
+            type:
+              - "null"
+              - string
   categories_stream:
     $ref: "#/definitions/parent_base_stream"
     $parameters:
-      name: "categories"
-      primary_key: "name"
-      path: "categories"
+      name: categories
+      primary_key: name
+      path: categories
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type:
+          - "null"
+          - object
+        additionalProperties: true
+        properties:
+          name:
+            type:
+              - "null"
+              - string
   permissions_stream:
     $parameters:
-      name: "permissions"
-      primary_key: "id"
+      name: permissions
+      primary_key: id
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever_with_partition"
@@ -88,12 +296,42 @@ definitions:
         $ref: "#/definitions/base_paginator"
       requester:
         $ref: "#/definitions/requester"
-        path: "docs/{{ stream_partition.doc_id }}/acl/permissions"
+        path: docs/{{ stream_partition.doc_id }}/acl/permissions
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type:
+          - "null"
+          - object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          access:
+            type:
+              - "null"
+              - string
+          principal:
+            type:
+              - "null"
+              - object
+            properties:
+              type:
+                type:
+                  - "null"
+                  - string
+              email:
+                type:
+                  - "null"
+                  - string
   pages_stream:
     $parameters:
-      name: "pages"
-    primary_key: "id"
+      name: pages
+    primary_key: id
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever_with_partition"
@@ -101,12 +339,198 @@ definitions:
         $ref: "#/definitions/base_paginator"
       requester:
         $ref: "#/definitions/requester"
-        path: "docs/{{ stream_partition.doc_id }}/pages"
+        path: docs/{{ stream_partition.doc_id }}/pages
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type:
+          - "null"
+          - object
+        additionalProperties: true
+        properties:
+          id:
+            type: string
+          type:
+            type: string
+          href:
+            type: string
+          browserLink:
+            type: string
+          name:
+            type: string
+          subtitle:
+            type: string
+          createdBy:
+            type: object
+            properties:
+              "@context":
+                type: string
+              "@type":
+                type: string
+              additionalType:
+                type: string
+              name:
+                type: string
+              email:
+                type: string
+          createdAt:
+            type:
+              - "null"
+              - string
+          updatedBy:
+            type:
+              - "null"
+              - object
+            properties:
+              "@context":
+                type: string
+              "@type":
+                type: string
+              additionalType:
+                type: string
+              name:
+                type: string
+              email:
+                type: string
+          updatedAt:
+            type:
+              - "null"
+              - string
+          icon:
+            type:
+              - "null"
+              - object
+            properties:
+              name:
+                type: string
+              type:
+                type: string
+              browserLink:
+                type: string
+          image:
+            type:
+              - "null"
+              - object
+            properties:
+              width:
+                type: number
+              height:
+                type: number
+              type:
+                type: string
+              browserLink:
+                type: string
+          parent:
+            type:
+              - "null"
+              - object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              href:
+                type: string
+              browserLink:
+                type: string
+              name:
+                type: string
+          children:
+            type: array
+            items:
+              type:
+                - "null"
+                - object
+              properties:
+                id:
+                  type: string
+                type:
+                  type: string
+                href:
+                  type: string
+                browserLink:
+                  type: string
+                name:
+                  type: string
+            authors:
+              type: array
+              items:
+                type:
+                  - "null"
+                  - object
+                properties:
+                  "@context":
+                    type: string
+                  "@type":
+                    type: string
+                  additionalType:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+              createdAt:
+                type: string
+              updatedBy:
+                type:
+                  - "null"
+                  - object
+                properties:
+                  "@context":
+                    type: string
+                  "@type":
+                    type: string
+                  additionalType:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+              createdBy:
+                type:
+                  - "null"
+                  - object
+                properties:
+                  "@context":
+                    type: string
+                  "@type":
+                    type: string
+                  additionalType:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+          contentType:
+            type:
+              - "null"
+              - string
+            enum:
+              - canvas
+              - embed
+          authors:
+            type:
+              - "null"
+              - array
+            items:
+              type: object
+              properties:
+                "@context":
+                  type: string
+                "@type":
+                  type: string
+                additionalType:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
   tables_stream:
     $parameters:
-      name: "tables"
-    primary_key: "id"
+      name: tables
+    primary_key: id
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever_with_partition"
@@ -114,12 +538,70 @@ definitions:
         $ref: "#/definitions/base_paginator"
       requester:
         $ref: "#/definitions/requester"
-        path: "docs/{{ stream_partition.doc_id }}/tables"
+        path: docs/{{ stream_partition.doc_id }}/tables
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type:
+          - "null"
+          - object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          tableType:
+            type:
+              - "null"
+              - string
+          href:
+            type:
+              - "null"
+              - string
+          browserLink:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          parent:
+            type:
+              - "null"
+              - object
+            properties:
+              id:
+                type:
+                  - "null"
+                  - string
+              type:
+                type:
+                  - "null"
+                  - string
+              href:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
   formulas_stream:
     $parameters:
-      name: "formulas"
-    primary_key: "id"
+      name: formulas
+    primary_key: id
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever_with_partition"
@@ -127,12 +609,62 @@ definitions:
         $ref: "#/definitions/base_paginator"
       requester:
         $ref: "#/definitions/requester"
-        path: "docs/{{ stream_partition.doc_id }}/formulas"
+        path: docs/{{ stream_partition.doc_id }}/formulas
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type:
+          - "null"
+          - object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          href:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          parent:
+            type:
+              - "null"
+              - object
+            properties:
+              type:
+                type:
+                  - "null"
+                  - string
+              id:
+                type:
+                  - "null"
+                  - string
+              href:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
   controls_stream:
     $parameters:
-      name: "controls"
-    primary_key: "id"
+      name: controls
+    primary_key: id
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever_with_partition"
@@ -140,12 +672,62 @@ definitions:
         $ref: "#/definitions/base_paginator"
       requester:
         $ref: "#/definitions/requester"
-        path: "docs/{{ stream_partition.doc_id }}/controls"
+        path: docs/{{ stream_partition.doc_id }}/controls
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type:
+          - "null"
+          - object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          href:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          parent:
+            type:
+              - "null"
+              - object
+            properties:
+              type:
+                type:
+                  - "null"
+                  - string
+              id:
+                type:
+                  - "null"
+                  - string
+              href:
+                type:
+                  - "null"
+                  - string
+              browserLink:
+                type:
+                  - "null"
+                  - string
+              name:
+                type:
+                  - "null"
+                  - string
   rows_stream:
     $parameters:
-      name: "rows"
-    primary_key: "id"
+      name: rows
+    primary_key: id
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever_with_partition"
@@ -155,8 +737,43 @@ definitions:
         $ref: "#/definitions/base_paginator"
       requester:
         $ref: "#/definitions/requester"
-        path: "docs/{{ stream_partition.parent_slice.doc_id }}/tables/{{ stream_partition.table_id }}/rows"
+        path:
+          docs/{{ stream_partition.parent_slice.doc_id }}/tables/{{ stream_partition.table_id
+          }}/rows
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: string
+          type:
+            type: string
+          href:
+            type: string
+          name:
+            type: string
+          index:
+            type: number
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+          browserLink:
+            type: string
+          values:
+            type: object
+            properties:
+              ^c-_:
+                type:
+                  - string
+                  - number
+                  - object
+                  - array
+                  - boolean
+                  - "null"
 streams:
   - "#/definitions/docs_stream"
   - "#/definitions/permissions_stream"
@@ -170,11 +787,11 @@ streams:
 check:
   type: CheckStream
   stream_names:
-    - "docs"
-    - "permissions"
-    - "categories"
-    - "pages"
-    - "tables"
-    - "formulas"
-    - "controls"
-    - "rows"
+    - docs
+    - permissions
+    - categories
+    - pages
+    - tables
+    - formulas
+    - controls
+    - rows

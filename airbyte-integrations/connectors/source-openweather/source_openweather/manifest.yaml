@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
@@ -9,11 +9,15 @@ definitions:
 
   requester:
     type: HttpRequester
-    url_base: "https://api.openweathermap.org/data/3.0/"
-    http_method: "GET"
+    url_base: https://api.openweathermap.org/data/3.0/
+    http_method: GET
     request_parameters:
-      lat: "{% if -90.00 <= config['lat']|float <= 90.00 %}{{ config['lat'] }}{% else %} WRONG LATITUDE{% endif %}"
-      lon: "{% if -180.00 <= config['lon']|float <= 180.00 %}{{ config['lon'] }}{% else %}WRONG LONGITUDE{% endif %}"
+      lat:
+        "{% if -90.00 <= config['lat']|float <= 90.00 %}{{ config['lat'] }}{% else
+        %} WRONG LATITUDE{% endif %}"
+      lon:
+        "{% if -180.00 <= config['lon']|float <= 180.00 %}{{ config['lon'] }}{%
+        else %}WRONG LONGITUDE{% endif %}"
       appid: "{{ config['appid'] }}"
       lang: "{{ config.get('lang')}}"
       units: "{{ config.get('units')}}"
@@ -49,11 +53,11 @@ definitions:
 
   onecall_stream:
     $ref: "#/definitions/base_stream"
-    name: "onecall"
+    name: onecall
     retriever:
       $ref: "#/definitions/retriever"
     $parameters:
-      path: "onecall"
+      path: onecall
     # the commented section is for incremental sync which is not supported by the API
     # path: "{% if config['dt']%}onecall/timemachine{% else %}onecall{% endif %}"
     # transformations:
@@ -65,13 +69,74 @@ definitions:
     # incremental_sync:
     #       $ref: "#/definitions/incremental_sync_base"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          lat:
+            type: number
+          lon:
+            type: number
+          timezone:
+            type: string
+          timezone_offset:
+            type: number
+          current:
+            type: object
+            additionalProperties: true
+            properties:
+              dt:
+                type: number
+              sunrise:
+                type: number
+              sunset:
+                type: number
+              temp:
+                type: number
+              feels_like:
+                type: number
+              pressure:
+                type: number
+              humidity:
+                type: number
+              dew_point:
+                type: number
+              uvi:
+                type: number
+              clouds:
+                type: number
+              visibility:
+                type: number
+              wind_speed:
+                type: number
+              wind_deg:
+                type: number
+              weather:
+                type: array
+              rain:
+                type: object
+                additionalProperties: true
+                properties:
+                  1h:
+                    type: number
+          minutely:
+            type: array
+          hourly:
+            type: array
+          daily:
+            type: array
+          alerts:
+            type: array
 streams:
   - "#/definitions/onecall_stream"
 
 check:
   type: CheckStream
   stream_names:
-    - "onecall"
+    - onecall
 
 spec:
   type: Spec
@@ -87,33 +152,42 @@ spec:
     properties:
       lat:
         type: string
-        pattern: "^[-]?\\d{1,2}(\\.\\d+)?$"
-        description: "Latitude, decimal (-90; 90). If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API"
+        pattern: ^[-]?\d{1,2}(\.\d+)?$
+        description:
+          Latitude, decimal (-90; 90). If you need the geocoder to automatic
+          convert city names and zip-codes to geo coordinates and the other way around,
+          please use our Geocoding API
         examples:
           - "45.7603"
           - "-21.249107858038816"
       lon:
         type: string
-        pattern: "^[-]?\\d{1,2}(\\.\\d+)?$"
-        description: "Longitude, decimal (-180; 180). If you need the geocoder to automatic convert city names and zip-codes to geo coordinates and the other way around, please use our Geocoding API"
+        pattern: ^[-]?\d{1,2}(\.\d+)?$
+        description:
+          Longitude, decimal (-180; 180). If you need the geocoder to automatic
+          convert city names and zip-codes to geo coordinates and the other way around,
+          please use our Geocoding API
         examples:
           - "4.835659"
           - "-70.39482074115321"
       appid:
         type: string
-        description: "API KEY"
+        description: API KEY
         airbyte_secret: true
       units:
         type: string
-        description: "Units of measurement. standard, metric and imperial units are available. If you do not use the units parameter, standard units will be applied by default."
+        description:
+          Units of measurement. standard, metric and imperial units are
+          available. If you do not use the units parameter, standard units will be
+          applied by default.
         enum:
           - standard
           - metric
           - imperial
         examples:
-          - "standard"
-          - "metric"
-          - "imperial"
+          - standard
+          - metric
+          - imperial
       # dt:
       #   type: string
       #   description : "Date in UNIX format"
@@ -121,7 +195,7 @@ spec:
       #     - '1693023447'
       only_current:
         type: boolean
-        description: "True for particular day"
+        description: True for particular day
         example:
           - "true"
       lang:
@@ -158,7 +232,7 @@ spec:
           - la
           - lt
           - mk
-          - "no"
+          - no
           - nl
           - pl
           - pt

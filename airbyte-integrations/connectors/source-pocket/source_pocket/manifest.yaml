@@ -1,12 +1,12 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     extractor:
-      class_name: "source_pocket.PocketExtractor"
+      class_name: source_pocket.PocketExtractor
   requester:
-    url_base: "https://getpocket.com/v3"
-    http_method: "POST"
+    url_base: https://getpocket.com/v3
+    http_method: POST
     request_parameters:
       consumer_key: "{{ config['consumer_key'] }}"
       access_token: "{{ config['access_token'] }}"
@@ -20,7 +20,7 @@ definitions:
       domain: "{{ config['domain'] }}"
       since: "{{ timestamp(config['since']) }}"
     error_handler:
-      type: "DefaultErrorHandler"
+      type: DefaultErrorHandler
       error_handlers:
         - response_filters:
             - http_codes: [401] # User authentication error
@@ -28,40 +28,326 @@ definitions:
             - http_codes: [403] # Access denied due to lack of permission or rate limiting
               action: RETRY
           backoff_strategies:
-            - type: "WaitTimeFromHeader"
-              header: "X-Limit-User-Reset"
+            - type: WaitTimeFromHeader
+              header: X-Limit-User-Reset
   retriever:
     record_selector:
       $ref: "#/definitions/selector"
     paginator:
-      type: "DefaultPaginator"
+      type: DefaultPaginator
       page_size_option:
-        inject_into: "request_parameter"
-        field_name: "count"
+        inject_into: request_parameter
+        field_name: count
       pagination_strategy:
-        type: "OffsetIncrement"
+        type: OffsetIncrement
         page_size: 10
       page_token_option:
         type: RequestOption
-        inject_into: "request_parameter"
-        field_name: "offset"
+        inject_into: request_parameter
+        field_name: offset
     requester:
       $ref: "#/definitions/requester"
   base_stream:
     retriever:
       $ref: "#/definitions/retriever"
     schema_loader:
-      type: "JsonFileSchemaLoader"
+      type: JsonFileSchemaLoader
   retrieve_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "retrieve"
-      primary_key: "item_id"
-      path: "/get"
+      name: retrieve
+      primary_key: item_id
+      path: /get
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          item_id:
+            type:
+              - "null"
+              - string
+            pattern: "[0-9]+"
+          resolved_id:
+            type:
+              - "null"
+              - string
+            pattern: "[0-9]+"
+          given_url:
+            type:
+              - "null"
+              - string
+          given_title:
+            type:
+              - "null"
+              - string
+          favorite:
+            type:
+              - "null"
+              - string
+            pattern: 0|1
+          status:
+            type:
+              - "null"
+              - string
+            pattern: 0|1|2
+          time_added:
+            type:
+              - "null"
+              - string
+            pattern: "[0-9]+"
+          time_updated:
+            type:
+              - "null"
+              - string
+            pattern: "[0-9]+"
+          time_read:
+            type:
+              - "null"
+              - string
+            pattern: "[0-9]+"
+          time_favorited:
+            type:
+              - "null"
+              - string
+            pattern: "[0-9]+"
+          sort_id:
+            type:
+              - "null"
+              - number
+          resolved_title:
+            type:
+              - "null"
+              - string
+          resolved_url:
+            type:
+              - "null"
+              - string
+          excerpt:
+            type:
+              - "null"
+              - string
+          is_article:
+            type:
+              - "null"
+              - string
+            pattern: 0|1
+          is_index:
+            type:
+              - "null"
+              - string
+            pattern: 0|1
+          has_image:
+            type:
+              - "null"
+              - string
+            pattern: 0|1|2
+          has_video:
+            type:
+              - "null"
+              - string
+            pattern: 0|1|2
+          word_count:
+            type:
+              - "null"
+              - string
+            pattern: "[0-9]+"
+          lang:
+            type:
+              - "null"
+              - string
+          time_to_read:
+            type:
+              - "null"
+              - number
+          top_image_url:
+            type:
+              - "null"
+              - string
+          tags:
+            type:
+              - "null"
+              - object
+            patternProperties:
+              .+:
+                type:
+                  - "null"
+                  - object
+                properties:
+                  item_id:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  tag:
+                    type:
+                      - "null"
+                      - string
+          authors:
+            type:
+              - "null"
+              - object
+            patternProperties:
+              "[0-9]+":
+                type:
+                  - "null"
+                  - object
+                additionalProperties: true
+                properties:
+                  item_id:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  author_id:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  name:
+                    type:
+                      - "null"
+                      - string
+                  url:
+                    type:
+                      - "null"
+                      - string
+          image:
+            type:
+              - "null"
+              - object
+            properties:
+              item_id:
+                type:
+                  - "null"
+                  - string
+                pattern: "[0-9]+"
+              src:
+                type:
+                  - "null"
+                  - string
+              width:
+                type:
+                  - "null"
+                  - string
+                pattern: "[0-9]+"
+              height:
+                type:
+                  - "null"
+                  - string
+                pattern: "[0-9]+"
+          images:
+            type:
+              - "null"
+              - object
+            patternProperties:
+              "[0-9]+":
+                type:
+                  - "null"
+                  - object
+                additionalProperties: true
+                properties:
+                  item_id:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  image_id:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  src:
+                    type:
+                      - "null"
+                      - string
+                  width:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  height:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  credit:
+                    type:
+                      - "null"
+                      - string
+                  caption:
+                    type:
+                      - "null"
+                      - string
+          videos:
+            type:
+              - "null"
+              - object
+            patternProperties:
+              "[0-9]+":
+                type:
+                  - "null"
+                  - object
+                additionalProperties: true
+                properties:
+                  item_id:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  video_id:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  src:
+                    type:
+                      - "null"
+                      - string
+                  width:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  height:
+                    type:
+                      - "null"
+                      - string
+                    pattern: "[0-9]+"
+                  type:
+                    type:
+                      - "null"
+                      - string
+                  vid:
+                    type:
+                      - "null"
+                      - string
+          domain_metadata:
+            type:
+              - "null"
+              - object
+            properties:
+              name:
+                type:
+                  - "null"
+                  - string
+              logo:
+                type:
+                  - "null"
+                  - string
+              greyscale_logo:
+                type:
+                  - "null"
+                  - string
+          listen_duration_estimate:
+            type:
+              - "null"
+              - number
 streams:
   - "#/definitions/retrieve_stream"
 
 check:
   stream_names:
-    - "retrieve"
+    - retrieve

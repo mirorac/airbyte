@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
@@ -6,8 +6,8 @@ definitions:
       field_path:
         - "{{ parameters['name'] }}"
   requester:
-    url_base: "https://sonarcloud.io/api"
-    http_method: "GET"
+    url_base: https://sonarcloud.io/api
+    http_method: GET
     request_parameters:
       organization: "{{ config['organization'] }}"
       createdAfter: "{{ config['start_date'] }}"
@@ -16,17 +16,17 @@ definitions:
       type: BearerAuthenticator
       api_token: "{{ config['user_token'] }}"
   increment_paginator:
-    type: "DefaultPaginator"
+    type: DefaultPaginator
     page_size_option:
-      inject_into: "request_parameter"
-      field_name: "ps"
+      inject_into: request_parameter
+      field_name: ps
     pagination_strategy:
-      type: "PageIncrement"
+      type: PageIncrement
       page_size: 100
     page_token_option:
       type: RequestOption
-      inject_into: "request_parameter"
-      field_name: "p"
+      inject_into: request_parameter
+      field_name: p
   retriever:
     record_selector:
       $ref: "#/definitions/selector"
@@ -40,22 +40,110 @@ definitions:
   components_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "components"
-      primary_key: "key"
-      path: "/components/search"
+      name: components
+      primary_key: key
+      path: /components/search
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          organization:
+            type: string
+          key:
+            type: string
+          name:
+            type: string
+          qualifier:
+            type: string
+          project:
+            type: string
   issues_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "issues"
-      primary_key: "key"
-      path: "/issues/search?componentKeys={{ ','.join(config.get('component_keys', [])) }}"
+      name: issues
+      primary_key: key
+      path:
+        /issues/search?componentKeys={{ ','.join(config.get('component_keys',
+        [])) }}
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          key:
+            type: string
+          rule:
+            type: string
+          severity:
+            type: string
+          component:
+            type: string
+          project:
+            type: string
+          resolution:
+            type: string
+          status:
+            type: string
+          message:
+            type: string
+          effort:
+            type: string
+          debt:
+            type: string
+          author:
+            type: string
+          creationDate:
+            type: string
+          updateDate:
+            type: string
+          type:
+            type: string
+          organization:
+            type: string
+          textRange:
+            type: object
+          tags:
+            type: array
+          line:
+            type: integer
+          hash:
+            type: string
+          flows:
+            type: array
   metrics_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "metrics"
-      primary_key: "id"
-      path: "/metrics/search"
+      name: metrics
+      primary_key: id
+      path: /metrics/search
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: string
+          key:
+            type: string
+          name:
+            type: string
+          type:
+            type: string
+          description:
+            type: string
+          domain:
+            type: string
+          qualitative:
+            type: boolean
+          hidden:
+            type: boolean
+          direction:
+            type: number
 streams:
   - "#/definitions/components_stream"
   - "#/definitions/issues_stream"
@@ -63,4 +151,4 @@ streams:
 
 check:
   stream_names:
-    - "components"
+    - components

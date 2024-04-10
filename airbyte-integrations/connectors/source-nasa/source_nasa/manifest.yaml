@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
@@ -9,13 +9,15 @@ definitions:
 
   requester:
     type: HttpRequester
-    url_base: "https://api.nasa.gov/"
-    http_method: "GET"
+    url_base: https://api.nasa.gov/
+    http_method: GET
     authenticator:
       type: NoAuth
     request_parameters:
       api_key: "{{ config['api_key'] }}"
-      start_date: "{{ stream_interval.start_time if stream_interval else config['start_date'] }}"
+      start_date:
+        "{{ stream_interval.start_time if stream_interval else config['start_date']
+        }}"
 
   retriever:
     type: SimpleRetriever
@@ -35,29 +37,107 @@ definitions:
     type: DatetimeBasedCursor
     cursor_field: date
     datetime_format: "%Y-%m-%d"
-    cursor_granularity: "PT0.000001S"
-    lookback_window: "P31D"
+    cursor_granularity: PT0.000001S
+    lookback_window: P31D
     start_datetime:
       datetime: "{{ config['start_date'] }}"
       datetime_format: "%Y-%m-%d"
     end_datetime:
       datetime: "{{ today_utc() }}"
       datetime_format: "%Y-%m-%d"
-    step: "P1M"
+    step: P1M
 
   nasa_apod_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "nasa_apod"
-      incremental_cursor: "date"
-      path: "planetary/apod"
+      name: nasa_apod
+      incremental_cursor: date
+      path: planetary/apod
     incremental_sync:
       $ref: "#/definitions/incremental_sync_base"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          resource:
+            type:
+              - "null"
+              - object
+            properties:
+              image_set:
+                type:
+                  - "null"
+                  - string
+              planet:
+                type:
+                  - "null"
+                  - string
+          concept_tags:
+            type:
+              - "null"
+              - boolean
+          title:
+            type:
+              - "null"
+              - string
+          date:
+            type:
+              - "null"
+              - string
+            format: "%Y-%m-%d"
+          url:
+            type:
+              - "null"
+              - string
+            format: uri
+          hdurl:
+            type:
+              - "null"
+              - string
+            format: uri
+          media_type:
+            type:
+              - "null"
+              - string
+            enum:
+              - image
+              - video
+          explanation:
+            type:
+              - "null"
+              - string
+          concepts:
+            type:
+              - "null"
+              - object
+              - string
+            patternProperties:
+              ^[0-9]+$:
+                type:
+                  - "null"
+                  - string
+          thumbnail_url:
+            type:
+              - "null"
+              - string
+            format: uri
+          copyright:
+            type:
+              - "null"
+              - string
+          service_version:
+            type:
+              - "null"
+              - string
+            pattern: ^v[0-9]$
 streams:
   - "#/definitions/nasa_apod_stream"
 
 check:
   type: CheckStream
   stream_names:
-    - "nasa_apod"
+    - nasa_apod

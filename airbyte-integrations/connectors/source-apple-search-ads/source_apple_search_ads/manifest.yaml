@@ -1,13 +1,13 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   requester:
     type: HttpRequester
-    url_base: "https://api.searchads.apple.com/api/v4"
-    http_method: "GET"
+    url_base: https://api.searchads.apple.com/api/v4
+    http_method: GET
     authenticator:
-      type: "OAuthAuthenticator"
-      token_refresh_endpoint: "https://appleid.apple.com/auth/oauth2/token?grant_type=client_credentials&scope=searchadsorg"
+      type: OAuthAuthenticator
+      token_refresh_endpoint: https://appleid.apple.com/auth/oauth2/token?grant_type=client_credentials&scope=searchadsorg
       client_id: "{{ config.client_id }}"
       client_secret: "{{ config.client_secret }}"
       refresh_token: ""
@@ -18,7 +18,7 @@ definitions:
         - http_codes: [500, 429]
           action: RETRY
       backoff_strategies:
-        - type: "ExponentialBackoffStrategy"
+        - type: ExponentialBackoffStrategy
   retriever:
     requester:
       $ref: "#/definitions/requester"
@@ -26,7 +26,7 @@ definitions:
   base_stream:
     selector:
       extractor:
-        field_path: ["data"]
+        field_path: [data]
     retriever:
       $ref: "#/definitions/retriever"
       record_selector:
@@ -47,58 +47,308 @@ definitions:
   campaigns_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "campaigns"
-      primary_key: "id"
-      path: "/campaigns"
+      name: campaigns
+      primary_key: id
+      path: /campaigns
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/schema#
+        properties:
+          adChannelType:
+            type: string
+          adamId:
+            type: integer
+          billingEvent:
+            type: string
+          budgetAmount:
+            anyOf:
+              - type: "null"
+              - properties:
+                  amount:
+                    type: string
+                  currency:
+                    type: string
+                type: object
+          budgetOrders:
+            type: array
+          countriesOrRegions:
+            items:
+              type: string
+            type: array
+          countryOrRegionServingStateReasons:
+            type: object
+          creationTime:
+            type: string
+          dailyBudgetAmount:
+            properties:
+              amount:
+                type: string
+              currency:
+                type: string
+            type: object
+          deleted:
+            type: boolean
+          displayStatus:
+            type: string
+          endTime:
+            type: "null"
+          id:
+            type: integer
+          locInvoiceDetails:
+            properties:
+              billingContactEmail:
+                type: string
+              buyerEmail:
+                type: string
+              buyerName:
+                type: string
+              clientName:
+                type:
+                  - "null"
+                  - string
+              orderNumber:
+                type:
+                  - "null"
+                  - string
+            type: object
+          modificationTime:
+            type: string
+          name:
+            type: string
+          orgId:
+            type: integer
+          paymentModel:
+            type: string
+          sapinLawResponse:
+            type: string
+          servingStateReasons:
+            type: "null"
+          servingStatus:
+            type: string
+          startTime:
+            type: string
+          status:
+            type: string
+          supplySources:
+            items:
+              type: string
+            type: array
+        type: object
   adgroups_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "adgroups"
-      primary_key: "id"
+      name: adgroups
+      primary_key: id
     retriever:
       $ref: "#/definitions/base_stream/retriever"
       partition_router:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/campaigns_stream"
-            parent_key: "id"
-            partition_field: "campaign_id"
+            parent_key: id
+            partition_field: campaign_id
       requester:
         $ref: "#/definitions/retriever/requester"
-        path: "/campaigns/{{ stream_slice.campaign_id }}/adgroups"
+        path: /campaigns/{{ stream_slice.campaign_id }}/adgroups
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/schema#
+        properties:
+          automatedKeywordsOptIn:
+            type: boolean
+          campaignId:
+            type: integer
+          cpaGoal:
+            type: "null"
+          creationTime:
+            type: string
+          defaultBidAmount:
+            properties:
+              amount:
+                type: string
+              currency:
+                type: string
+            type: object
+          deleted:
+            type: boolean
+          displayStatus:
+            type: string
+          endTime:
+            type: "null"
+          id:
+            type: integer
+          modificationTime:
+            type: string
+          name:
+            type: string
+          orgId:
+            type: integer
+          pricingModel:
+            type: string
+          servingStateReasons:
+            anyOf:
+              - type: "null"
+              - items:
+                  type: string
+                type: array
+          servingStatus:
+            type: string
+          startTime:
+            type: string
+          status:
+            type: string
+          targetingDimensions:
+            properties:
+              adminArea:
+                anyOf:
+                  - type: "null"
+                  - properties:
+                      included:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+              age:
+                anyOf:
+                  - type: "null"
+                  - properties:
+                      included:
+                        items:
+                          properties:
+                            maxAge:
+                              type: "null"
+                            minAge:
+                              type:
+                                - integer
+                                - "null"
+                          type: object
+                        type: array
+                    type: object
+              appCategories:
+                properties:
+                  excluded:
+                    anyOf:
+                      - type: "null"
+                      - items:
+                          type: integer
+                        type: array
+                  included:
+                    anyOf:
+                      - type: "null"
+                      - items:
+                          type: integer
+                        type: array
+                type: object
+              appDownloaders:
+                properties:
+                  excluded:
+                    items:
+                      type: string
+                    type: array
+                  included:
+                    items:
+                      type: string
+                    type: array
+                type: object
+              country:
+                anyOf:
+                  - type: "null"
+                  - properties:
+                      included:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+              daypart:
+                type: "null"
+              deviceClass:
+                properties:
+                  included:
+                    items:
+                      type: string
+                    type: array
+                type: object
+              gender:
+                type: "null"
+              locality:
+                anyOf:
+                  - type: "null"
+                  - properties:
+                      included:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+            type: object
+        type: object
   keywords_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "keywords"
-      primary_key: "id"
+      name: keywords
+      primary_key: id
     retriever:
       $ref: "#/definitions/base_stream/retriever"
       partition_router:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/adgroups_stream"
-            parent_key: "id"
-            partition_field: "adgroup_id"
+            parent_key: id
+            partition_field: adgroup_id
       requester:
         $ref: "#/definitions/retriever/requester"
-        path: "/campaigns/{{ stream_slice.parent_slice.campaign_id }}/adgroups/{{ stream_slice.adgroup_id }}/targetingkeywords"
+        path:
+          /campaigns/{{ stream_slice.parent_slice.campaign_id }}/adgroups/{{ stream_slice.adgroup_id
+          }}/targetingkeywords
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/schema#
+        properties:
+          adGroupId:
+            type: integer
+          bidAmount:
+            properties:
+              amount:
+                type: string
+              currency:
+                type: string
+            type: object
+          campaignId:
+            type: integer
+          creationTime:
+            type: string
+          deleted:
+            type: boolean
+          id:
+            type: integer
+          matchType:
+            type: string
+          modificationTime:
+            type: string
+          status:
+            type: string
+          text:
+            type: string
+        type: object
   incremental_sync:
-    type: "DatetimeBasedCursor"
+    type: DatetimeBasedCursor
     start_datetime: "{{ config.start_date }}"
     end_datetime: "{{ config.end_date or today_utc() }}"
     datetime_format: "%Y-%m-%d"
-    step: "P1D"
-    cursor_granularity: "P1D"
-    cursor_field: "date"
-    lookback_window: "P30D"
+    step: P1D
+    cursor_granularity: P1D
+    cursor_field: date
+    lookback_window: P30D
 
   report_stream:
     selector:
       extractor:
-        field_path: ["data", "reportingDataResponse", "row"]
+        field_path: [data, reportingDataResponse, row]
     incremental_sync:
       $ref: "#/definitions/incremental_sync"
     retriever:
@@ -109,100 +359,443 @@ definitions:
         type: NoPagination
       requester:
         $ref: "#/definitions/retriever/requester"
-        http_method: "POST"
+        http_method: POST
         request_body_json:
           startTime: "{{ stream_slice.start_time }}"
           endTime: "{{ stream_slice.end_time }}"
-          timeZone: "UTC"
+          timeZone: UTC
           granularity: "{{ parameters.granularity }}"
-          selector: '{
-            "orderBy": [
-            {
-            "field": "countryOrRegion",
-            "sortOrder": "ASCENDING"
-            }
-            ]
-            }'
+          selector:
+            '{ "orderBy": [ { "field": "countryOrRegion", "sortOrder": "ASCENDING"
+            } ] }'
           groupBy: "[ 'countryOrRegion' ]"
 
   campaigns_report_daily_stream:
     $ref: "#/definitions/report_stream"
     $parameters:
-      name: "campaigns_report_daily"
-      granularity: "DAILY"
-      primary_key: [["date"], ["campaignId"]]
+      name: campaigns_report_daily
+      granularity: DAILY
+      primary_key: [[date], [campaignId]]
     retriever:
       $ref: "#/definitions/report_stream/retriever"
       requester:
         $ref: "#/definitions/report_stream/retriever/requester"
-        path: "/reports/campaigns"
+        path: /reports/campaigns
     transformations:
       - type: AddFields
         fields:
-          - path: ["campaignId"]
+          - path: [campaignId]
             value: "{{ record.metadata.campaignId }}"
-          - path: ["date"]
+          - path: [date]
             value: "{{ stream_slice.start_time }}"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/schema#
+        properties:
+          campaignId:
+            type: integer
+          date:
+            type: string
+          granularity:
+            items:
+              properties:
+                avgCPA:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                avgCPM:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                avgCPT:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                conversionRate:
+                  type: number
+                date:
+                  type: string
+                impressions:
+                  type: integer
+                installs:
+                  type: integer
+                latOffInstalls:
+                  type: integer
+                latOnInstalls:
+                  type: integer
+                localSpend:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                newDownloads:
+                  type: integer
+                redownloads:
+                  type: integer
+                taps:
+                  type: integer
+                ttr:
+                  type: number
+              type: object
+            type: array
+          metadata:
+            properties:
+              adChannelType:
+                type: string
+              app:
+                properties:
+                  adamId:
+                    type: integer
+                  appName:
+                    type: string
+                type: object
+              billingEvent:
+                type: string
+              campaignId:
+                type: integer
+              campaignName:
+                type: string
+              campaignStatus:
+                type: string
+              countriesOrRegions:
+                items:
+                  type: string
+                type: array
+              countryOrRegion:
+                type: string
+              countryOrRegionServingStateReasons:
+                type: object
+              dailyBudget:
+                properties:
+                  amount:
+                    type: string
+                  currency:
+                    type: string
+                type: object
+              deleted:
+                type: boolean
+              displayStatus:
+                type: string
+              modificationTime:
+                type: string
+              orgId:
+                type: integer
+              servingStateReasons:
+                type: "null"
+              servingStatus:
+                type: string
+              supplySources:
+                items:
+                  type: string
+                type: array
+              totalBudget:
+                anyOf:
+                  - type: "null"
+                  - properties:
+                      amount:
+                        type: string
+                      currency:
+                        type: string
+                    type: object
+            type: object
+          other:
+            type: boolean
+        type: object
   adgroups_report_daily_stream:
     $ref: "#/definitions/report_stream"
     $parameters:
-      name: "adgroups_report_daily"
-      granularity: "DAILY"
-      primary_key: [["date"], ["adGroupId"]]
+      name: adgroups_report_daily
+      granularity: DAILY
+      primary_key: [[date], [adGroupId]]
     retriever:
       $ref: "#/definitions/report_stream/retriever"
       partition_router:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/campaigns_stream"
-            parent_key: "id"
-            partition_field: "campaign_id"
+            parent_key: id
+            partition_field: campaign_id
       requester:
         $ref: "#/definitions/report_stream/retriever/requester"
-        path: "/reports/campaigns/{{ stream_slice.campaign_id }}/adgroups"
+        path: /reports/campaigns/{{ stream_slice.campaign_id }}/adgroups
     transformations:
       - type: AddFields
         fields:
-          - path: ["adGroupId"]
+          - path: [adGroupId]
             value: "{{ record.metadata.adGroupId }}"
-          - path: ["date"]
+          - path: [date]
             value: "{{ stream_slice.start_time }}"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/schema#
+        properties:
+          adGroupId:
+            type: integer
+          date:
+            type: string
+          granularity:
+            items:
+              properties:
+                avgCPA:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                avgCPM:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                avgCPT:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                conversionRate:
+                  type: number
+                date:
+                  type: string
+                impressions:
+                  type: integer
+                installs:
+                  type: integer
+                latOffInstalls:
+                  type: integer
+                latOnInstalls:
+                  type: integer
+                localSpend:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                newDownloads:
+                  type: integer
+                redownloads:
+                  type: integer
+                taps:
+                  type: integer
+                ttr:
+                  type: number
+              type: object
+            type: array
+          metadata:
+            properties:
+              adGroupDisplayStatus:
+                type: string
+              adGroupId:
+                type: integer
+              adGroupName:
+                type: string
+              adGroupServingStateReasons:
+                type: "null"
+              adGroupServingStatus:
+                type: string
+              adGroupStatus:
+                type: string
+              automatedKeywordsOptIn:
+                type: boolean
+              campaignId:
+                type: integer
+              countryOrRegion:
+                type: string
+              cpaGoal:
+                type: "null"
+              defaultBidAmount:
+                properties:
+                  amount:
+                    type: string
+                  currency:
+                    type: string
+                type: object
+              deleted:
+                type: boolean
+              endTime:
+                type: "null"
+              modificationTime:
+                type: string
+              orgId:
+                type: integer
+              pricingModel:
+                type: string
+              startTime:
+                type: string
+            type: object
+          other:
+            type: boolean
+        type: object
   keywords_report_daily_stream:
     $ref: "#/definitions/report_stream"
     $parameters:
-      name: "keywords_report_daily"
-      granularity: "DAILY"
-      primary_key: [["date"], ["keywordId"]]
+      name: keywords_report_daily
+      granularity: DAILY
+      primary_key: [[date], [keywordId]]
     retriever:
       $ref: "#/definitions/report_stream/retriever"
       partition_router:
         type: SubstreamPartitionRouter
         parent_stream_configs:
           - stream: "#/definitions/campaigns_stream"
-            parent_key: "id"
-            partition_field: "campaign_id"
+            parent_key: id
+            partition_field: campaign_id
       requester:
         $ref: "#/definitions/report_stream/retriever/requester"
-        path: "/reports/campaigns/{{ stream_slice.campaign_id }}/keywords"
+        path: /reports/campaigns/{{ stream_slice.campaign_id }}/keywords
         error_handler:
           $ref: "#/definitions/requester/error_handler"
           response_filters:
-            - predicate: "{{ 'CAMPAIGN DOES NOT CONTAIN KEYWORD' in response.error.errors[0].message }}"
+            - predicate:
+                "{{ 'CAMPAIGN DOES NOT CONTAIN KEYWORD' in response.error.errors[0].message
+                }}"
               action: IGNORE
             - http_codes: [500, 429]
               action: RETRY
           backoff_strategies:
-            - type: "ExponentialBackoffStrategy"
+            - type: ExponentialBackoffStrategy
     transformations:
       - type: AddFields
         fields:
-          - path: ["keywordId"]
+          - path: [keywordId]
             value: "{{ record.metadata.keywordId }}"
-          - path: ["date"]
+          - path: [date]
             value: "{{ stream_slice.start_time }}"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/schema#
+        properties:
+          date:
+            type: string
+          granularity:
+            items:
+              properties:
+                avgCPA:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                avgCPT:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                conversionRate:
+                  type: number
+                date:
+                  type: string
+                impressions:
+                  type: integer
+                installs:
+                  type: integer
+                latOffInstalls:
+                  type: integer
+                latOnInstalls:
+                  type: integer
+                localSpend:
+                  properties:
+                    amount:
+                      type: string
+                    currency:
+                      type: string
+                  type: object
+                newDownloads:
+                  type: integer
+                redownloads:
+                  type: integer
+                taps:
+                  type: integer
+                ttr:
+                  type: number
+              type: object
+            type: array
+          insights:
+            properties:
+              bidRecommendation:
+                properties:
+                  bidMax:
+                    anyOf:
+                      - type: "null"
+                      - properties:
+                          amount:
+                            type: string
+                          currency:
+                            type: string
+                        type: object
+                  bidMin:
+                    anyOf:
+                      - type: "null"
+                      - properties:
+                          amount:
+                            type: string
+                          currency:
+                            type: string
+                        type: object
+                type: object
+            type: object
+          keywordId:
+            type: integer
+          metadata:
+            properties:
+              adGroupDeleted:
+                type: boolean
+              adGroupId:
+                type: integer
+              adGroupName:
+                type: string
+              bidAmount:
+                properties:
+                  amount:
+                    type: string
+                  currency:
+                    type: string
+                type: object
+              countryOrRegion:
+                type: string
+              deleted:
+                type: boolean
+              keyword:
+                type: string
+              keywordDisplayStatus:
+                type: string
+              keywordId:
+                type: integer
+              keywordStatus:
+                type: string
+              matchType:
+                type: string
+              modificationTime:
+                type: string
+            type: object
+          other:
+            type: boolean
+        type: object
 streams:
   - "#/definitions/campaigns_stream"
   - "#/definitions/adgroups_stream"
@@ -213,4 +806,4 @@ streams:
 
 check:
   stream_names:
-    - "campaigns"
+    - campaigns

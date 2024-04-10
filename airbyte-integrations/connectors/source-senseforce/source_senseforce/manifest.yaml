@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
@@ -8,7 +8,7 @@ definitions:
   requester:
     # url_base: "http://localhost:8080"
     url_base: "{{ config['backend_url'] }}"
-    http_method: "POST"
+    http_method: POST
     request_body_data: |
       [{"clause": {"type": "timestamp", "operator": 10, "parameters": 
           [{"value": {{ stream_slice['start_time'] | int * 1000 }} },
@@ -23,17 +23,17 @@ definitions:
       api_token: "{{ config['access_token'] }}"
 
   incremental_sync:
-    type: "DatetimeBasedCursor"
+    type: DatetimeBasedCursor
     start_datetime:
       datetime: "{{ config['start_date'] }}"
       datetime_format: "%Y-%m-%d"
     end_datetime:
       datetime: "{{ now_utc() }}"
       datetime_format: "%Y-%m-%d %H:%M:%S.%f+00:00"
-    step: "P100D" #TODO: Add {{ config['slice_range'] ~ d }} here, once it's possible to use config-values for step definition
+    step: P100D #TODO: Add {{ config['slice_range'] ~ d }} here, once it's possible to use config-values for step definition
     datetime_format: "%s"
-    cursor_granularity: "PT1S"
-    cursor_field: "airbyte_cursor"
+    cursor_granularity: PT1S
+    cursor_field: airbyte_cursor
 
   retriever:
     record_selector:
@@ -41,15 +41,15 @@ definitions:
     paginator:
       type: DefaultPaginator
       page_size_option:
-        inject_into: "request_parameter"
-        field_name: "limit"
+        inject_into: request_parameter
+        field_name: limit
       pagination_strategy:
-        type: "OffsetIncrement"
+        type: OffsetIncrement
         page_size: 10000
       page_token_option:
         type: RequestOption
-        field_name: "offset"
-        inject_into: "request_parameter"
+        field_name: offset
+        inject_into: request_parameter
     requester:
       $ref: "#/definitions/requester"
 
@@ -61,19 +61,36 @@ definitions:
   dataset_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "dataset"
+      name: dataset
       primary_key:
-        - "id"
-      path: "/api/dataset/execute/{{ config['dataset_id']}}"
+        - id
+      path: /api/dataset/execute/{{ config['dataset_id']}}
     transformations:
       - type: AddFields
         fields:
-          - path: ["airbyte_cursor"]
+          - path: [airbyte_cursor]
             value: "{{ record['timestamp'] | int / 1000 }}"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          timestamp:
+            type: integer
+          thing:
+            type: string
+          id:
+            type:
+              - "null"
+              - string
+          airbyte_cursor:
+            type: number
 streams:
   - "#/definitions/dataset_stream"
 
 check:
   stream_names:
-    - "dataset"
+    - dataset

@@ -1,12 +1,12 @@
-version: "0.51.0"
+version: 0.51.0
 
 definitions:
   entries_selector:
     extractor:
-      field_path: ["entries"]
+      field_path: [entries]
   requester:
-    url_base: "https://api.chartmogul.com"
-    http_method: "GET"
+    url_base: https://api.chartmogul.com
+    http_method: GET
     authenticator:
       type: BasicHttpAuthenticator
       username: "{{ config['api_key'] }}"
@@ -22,7 +22,7 @@ definitions:
       paginator:
         type: DefaultPaginator
         pagination_strategy:
-          type: "PageIncrement"
+          type: PageIncrement
           start_from_page: 1
           page_size: 200
         page_size_option:
@@ -33,10 +33,171 @@ definitions:
           inject_into: request_parameter
           field_name: page
     $parameters:
-      name: "customers"
-      primary_key: "id"
-      path: "/v1/customers"
+      name: customers
+      primary_key: id
+      path: /v1/customers
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type:
+              - integer
+          uuid:
+            type:
+              - string
+          external_id:
+            type:
+              - "null"
+              - string
+          external_ids:
+            type:
+              - "null"
+              - array
+          data_source_uuid:
+            type:
+              - "null"
+              - string
+          data_source_uuids:
+            type:
+              - "null"
+              - array
+          name:
+            type:
+              - "null"
+              - string
+          company:
+            type:
+              - "null"
+              - string
+          email:
+            type:
+              - "null"
+              - string
+          status:
+            type:
+              - "null"
+              - string
+          lead_created_at:
+            type:
+              - "null"
+              - string
+          free_trial_started_at:
+            type:
+              - "null"
+              - string
+          customer_since:
+            type:
+              - "null"
+              - string
+          city:
+            type:
+              - "null"
+              - string
+          state:
+            type:
+              - "null"
+              - string
+          country:
+            type:
+              - "null"
+              - string
+          zip:
+            type:
+              - "null"
+              - string
+          attributes:
+            type:
+              - "null"
+              - object
+            properties:
+              tags:
+                type:
+                  - "null"
+                  - array
+              stripe:
+                type:
+                  - "null"
+                  - object
+                properties:
+                  brandID:
+                    type:
+                      - "null"
+                      - string
+                  brandName:
+                    type:
+                      - "null"
+                      - string
+                  createdAt:
+                    type:
+                      - "null"
+                      - string
+                  platformName:
+                    type:
+                      - "null"
+                      - string
+              clearbit:
+                type:
+                  - "null"
+                  - object
+                properties: {}
+              custom:
+                type:
+                  - "null"
+                  - object
+                properties: {}
+          address:
+            type:
+              - "null"
+              - object
+            properties:
+              country:
+                type:
+                  - "null"
+                  - string
+              state:
+                type:
+                  - "null"
+                  - string
+              city:
+                type:
+                  - "null"
+                  - string
+              address_zip:
+                type:
+                  - "null"
+                  - string
+          mrr:
+            type:
+              - "null"
+              - integer
+          arr:
+            type:
+              - "null"
+              - integer
+          billing-system-url:
+            type:
+              - "null"
+              - string
+          chartmogul-url:
+            type:
+              - "null"
+              - string
+          billing-system-type:
+            type:
+              - "null"
+              - string
+          currency:
+            type:
+              - "null"
+              - string
+          currency-sign:
+            type:
+              - "null"
+              - string
   activities_stream:
     retriever:
       $ref: "#/definitions/retriever"
@@ -47,7 +208,7 @@ definitions:
       paginator:
         type: DefaultPaginator
         pagination_strategy:
-          type: "CursorPagination"
+          type: CursorPagination
           cursor_value: "{{ response['entries'][-1]['uuid'] }}"
           stop_condition: "{{ not response.has_more }}"
           page_size: 200
@@ -59,10 +220,72 @@ definitions:
           inject_into: request_parameter
           field_name: start-after
     $parameters:
-      name: "activities"
-      primary_key: "uuid"
-      path: "/v1/activities"
+      name: activities
+      primary_key: uuid
+      path: /v1/activities
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          description:
+            type:
+              - "null"
+              - string
+          activity-mrr-movement:
+            type:
+              - "null"
+              - integer
+          activity-mrr:
+            type:
+              - "null"
+              - integer
+          activity-arr:
+            type:
+              - "null"
+              - integer
+          date:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          currency:
+            type:
+              - "null"
+              - string
+          subscription-external-id:
+            type:
+              - "null"
+              - string
+          plan-external-id:
+            type:
+              - "null"
+              - string
+          customer-name:
+            type:
+              - "null"
+              - string
+          customer-uuid:
+            type:
+              - "null"
+              - string
+          customer-external-id:
+            type:
+              - "null"
+              - string
+          billing-connector-uuid:
+            type:
+              - "null"
+              - string
+          uuid:
+            type:
+              - string
   customer_daily_count_stream:
     retriever:
       $ref: "#/definitions/retriever"
@@ -73,10 +296,23 @@ definitions:
           end-date: "{{ now_utc().strftime('%Y-%m-%d') }}"
           interval: day
     $parameters:
-      name: "customer_daily_count"
-      primary_key: "date"
-      path: "/v1/metrics/customer-count"
+      name: customer_daily_count
+      primary_key: date
+      path: /v1/metrics/customer-count
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          date:
+            type:
+              - string
+          customers:
+            type:
+              - integer
   customer_weekly_count_stream:
     retriever:
       $ref: "#/definitions/retriever"
@@ -87,10 +323,23 @@ definitions:
           end-date: "{{ now_utc().strftime('%Y-%m-%d') }}"
           interval: week
     $parameters:
-      name: "customer_weekly_count"
-      primary_key: "date"
-      path: "/v1/metrics/customer-count"
+      name: customer_weekly_count
+      primary_key: date
+      path: /v1/metrics/customer-count
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          date:
+            type:
+              - string
+          customers:
+            type:
+              - integer
   customer_monthly_count_stream:
     retriever:
       $ref: "#/definitions/retriever"
@@ -101,10 +350,23 @@ definitions:
           end-date: "{{ now_utc().strftime('%Y-%m-%d') }}"
           interval: month
     $parameters:
-      name: "customer_monthly_count"
-      primary_key: "date"
-      path: "/v1/metrics/customer-count"
+      name: customer_monthly_count
+      primary_key: date
+      path: /v1/metrics/customer-count
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          date:
+            type:
+              - string
+          customers:
+            type:
+              - integer
   customer_quarterly_count_stream:
     retriever:
       $ref: "#/definitions/retriever"
@@ -115,10 +377,23 @@ definitions:
           end-date: "{{ now_utc().strftime('%Y-%m-%d') }}"
           interval: quarter
     $parameters:
-      name: "customer_quarterly_count"
-      primary_key: "date"
-      path: "/v1/metrics/customer-count"
+      name: customer_quarterly_count
+      primary_key: date
+      path: /v1/metrics/customer-count
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          date:
+            type:
+              - string
+          customers:
+            type:
+              - integer
 streams:
   - "#/definitions/customers_stream"
   - "#/definitions/activities_stream"
@@ -129,4 +404,4 @@ streams:
 
 check:
   stream_names:
-    - "customers"
+    - customers

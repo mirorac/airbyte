@@ -1,12 +1,12 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     extractor:
-      field_path: ["Data"]
+      field_path: [Data]
   requester:
-    url_base: "https://api.mailjet.com/v3/REST"
-    http_method: "GET"
+    url_base: https://api.mailjet.com/v3/REST
+    http_method: GET
     authenticator:
       type: BasicHttpAuthenticator
       username: "{{ config['api_key'] }}"
@@ -14,15 +14,15 @@ definitions:
   offset_paginator:
     type: DefaultPaginator
     pagination_strategy:
-      type: "OffsetIncrement"
+      type: OffsetIncrement
       page_size: 100
     page_token_option:
       type: RequestOption
-      field_name: "offset"
-      inject_into: "request_parameter"
+      field_name: offset
+      inject_into: request_parameter
     page_size_option:
-      inject_into: "request_parameter"
-      field_name: "limit"
+      inject_into: request_parameter
+      field_name: limit
   retriever:
     record_selector:
       $ref: "#/definitions/selector"
@@ -43,9 +43,27 @@ definitions:
       requester:
         $ref: "#/definitions/requester"
     $parameters:
-      name: "contactslist"
-      primary_key: "ID"
-      path: "/contactslist"
+      name: contactslist
+      primary_key: ID
+      path: /contactslist
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          Address:
+            type: string
+          CreatedAt:
+            type: string
+          ID:
+            type: integer
+          IsDeleted:
+            type: boolean
+          Name:
+            type: string
+          SubscriberCount:
+            type: integer
   contacts_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -56,21 +74,153 @@ definitions:
       requester:
         $ref: "#/definitions/requester"
     $parameters:
-      name: "contacts"
-      primary_key: "ID"
-      path: "/contact"
+      name: contacts
+      primary_key: ID
+      path: /contact
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          CreatedAt:
+            type: string
+          DeliveredCount:
+            type: integer
+          Email:
+            type: string
+          ID:
+            type: integer
+          IsOptInPending:
+            type: boolean
+          IsSpamComplaining:
+            type: boolean
+          LastActivityAt:
+            type: string
+          LastUpdateAt:
+            type: string
+          Name:
+            type: string
+          UnsubscribedAt:
+            type: string
+          UnsubscribedBy:
+            type: string
+          IsExcludedFromCampaigns:
+            type: boolean
+          ExclusionFromCampaignsUpdatedAt:
+            type: string
   stats_api_lifetime_message_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "stats_api_lifetime_message"
-      primary_key: "APIKeyID"
-      path: "/statcounters?CounterSource=APIKey&CounterResolution=Lifetime&CounterTiming=Message"
+      name: stats_api_lifetime_message
+      primary_key: APIKeyID
+      path: /statcounters?CounterSource=APIKey&CounterResolution=Lifetime&CounterTiming=Message
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          APIKeyID:
+            type: integer
+          EventClickDelay:
+            type: integer
+          EventClickedCount:
+            type: integer
+          EventOpenDelay:
+            type: integer
+          EventOpenedCount:
+            type: integer
+          EventUnsubscribedCount:
+            type: integer
+          EventWorkflowExitedCount:
+            type: integer
+          MessageBlockedCount:
+            type: integer
+          MessageClickedCount:
+            type: integer
+          MessageDeferredCount:
+            type: integer
+          MessageHardBouncedCount:
+            type: integer
+          MessageOpenedCount:
+            type: integer
+          MessageQueuedCount:
+            type: integer
+          MessageSentCount:
+            type: integer
+          MessageSoftBouncedCount:
+            type: integer
+          MessageSpamCount:
+            type: integer
+          MessageUnsubscribedCount:
+            type: integer
+          MessageWorkFlowExitedCount:
+            type: integer
+          SourceID:
+            type: integer
+          Timeslice:
+            type: string
+          Total:
+            type: integer
+          EventSpamCount:
+            type: integer
   campaign_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "campaign"
-      primary_key: "ID"
-      path: "/campaign"
+      name: campaign
+      primary_key: ID
+      path: /campaign
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          CampaignType:
+            type: integer
+          ClickTracked:
+            type: integer
+          CreatedAt:
+            type: string
+          CustomValue:
+            type: string
+          FirstMessageID:
+            type: integer
+          FromEmail:
+            type: string
+          FromID:
+            type: number
+          FromName:
+            type: string
+          HasHtmlCount:
+            type: number
+          HasTxtCount:
+            type: number
+          ID:
+            type: integer
+          IsDeleted:
+            type: boolean
+          IsStarred:
+            type: boolean
+          ListID:
+            type: integer
+          NewsLetterID:
+            type: integer
+          OpenTracked:
+            type: number
+          SendEndAt:
+            type: string
+          SendStartAt:
+            type: string
+          SpamassScore:
+            type: integer
+          Status:
+            type: integer
+          Subject:
+            type: string
+          UnsubscribeTrackedCount:
+            type: integer
   message_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -81,9 +231,61 @@ definitions:
       requester:
         $ref: "#/definitions/requester"
     $parameters:
-      name: "message"
-      primary_key: "ID"
-      path: "/message?ShowSubject=true"
+      name: message
+      primary_key: ID
+      path: /message?ShowSubject=true
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          ArrivedAt:
+            type: string
+          AttachmentCount:
+            type: integer
+          AttemptCount:
+            type: integer
+          ContactAlt:
+            type: string
+          ContactID:
+            type: integer
+          Delay:
+            type: integer
+          DestinationID:
+            type: integer
+          FilterTime:
+            type: integer
+          ID:
+            type: integer
+          IsClickTracked:
+            type: boolean
+          IsHTMLPartIncluded:
+            type: boolean
+          IsOpenTracked:
+            type: boolean
+          IsTextPartIncluded:
+            type: boolean
+          IsUnsubTracked:
+            type: boolean
+          MessageSize:
+            type: integer
+          SenderID:
+            type: integer
+          SpamassassinScore:
+            type: integer
+          SpamassRules:
+            type: string
+          StatePermanent:
+            type: boolean
+          Status:
+            type: string
+          Subject:
+            type: string
+          UUID:
+            type: string
+          CampaignID:
+            type: integer
   listrecipient_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -94,10 +296,32 @@ definitions:
       requester:
         $ref: "#/definitions/requester"
     $parameters:
-      name: "listrecipient"
-      primary_key: "ID"
-      path: "/listrecipient"
+      name: listrecipient
+      primary_key: ID
+      path: /listrecipient
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          ContactID:
+            type: integer
+          ID:
+            type: integer
+          IsActive:
+            type: boolean
+          IsUnsubscribed:
+            type: boolean
+          ListID:
+            type: integer
+          ListName:
+            type: string
+          SubscribedAt:
+            type: string
+          UnsubscribedAt:
+            type: string
 streams:
   - "#/definitions/contactslist_stream"
   - "#/definitions/contacts_stream"
@@ -108,4 +332,4 @@ streams:
 
 check:
   stream_names:
-    - "contactslist"
+    - contactslist

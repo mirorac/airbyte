@@ -7,10 +7,6 @@ check:
     - space
 
 definitions:
-  schema_loader:
-    type: JsonFileSchemaLoader
-    file_path: "./source_confluence/schemas/{{ parameters.name }}.json"
-
   selector:
     type: RecordSelector
     extractor:
@@ -53,9 +49,6 @@ definitions:
 
   base_stream:
     type: DeclarativeStream
-    schema_loader:
-      $ref: "#/definitions/schema_loader"
-
   audit_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -63,11 +56,62 @@ definitions:
       requester:
         $ref: "#/definitions/requester"
         request_parameters: {}
-    primary_key: "creationDate"
+    primary_key: creationDate
     $parameters:
-      name: "audit"
-      path: "audit"
+      name: audit
+      path: audit
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          author:
+            type:
+              - "null"
+              - object
+          remoteAddress:
+            type:
+              - "null"
+              - string
+          creationDate:
+            type:
+              - "null"
+              - integer
+          summary:
+            type:
+              - "null"
+              - string
+          description:
+            type:
+              - "null"
+              - string
+          category:
+            type:
+              - "null"
+              - string
+          sysAdmin:
+            type:
+              - "null"
+              - boolean
+          superAdmin:
+            type:
+              - "null"
+              - boolean
+          affectedObject:
+            type:
+              - "null"
+              - object
+          changedValues:
+            type:
+              - "null"
+              - array
+          associatedObjects:
+            type:
+              - "null"
+              - array
   blogposts_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -77,11 +121,162 @@ definitions:
         request_parameters:
           expand: >-
             ["history","history.lastUpdated","history.previousVersion","history.contributors","restrictions.read.restrictions.user","version","descendants.comment","body","body.storage","body.view",]
-    primary_key: "id"
+    primary_key: id
     $parameters:
-      name: "blog_posts"
+      name: blog_posts
       path: content?type=blogpost
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        definitions:
+          user:
+            type: object
+            properties:
+              type:
+                type:
+                  - string
+                  - "null"
+              accountId:
+                type:
+                  - string
+                  - "null"
+              email:
+                type:
+                  - string
+                  - "null"
+              publicName:
+                type:
+                  - string
+                  - "null"
+          content:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              type:
+                type: string
+              status:
+                type: string
+          contentRestriction:
+            type: object
+            properties:
+              operations:
+                type:
+                  - string
+                  - "null"
+              restrictions:
+                user:
+                  type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: "#/definitions/user"
+          usersUserKeys:
+            type: object
+            properties:
+              users:
+                type: array
+                items:
+                  $ref: "#/definitions/user"
+              userKeys:
+                type: array
+                items:
+                  type: string
+          version:
+            type: object
+            properties:
+              by:
+                $ref: "#/definitions/user"
+              when:
+                type:
+                  - string
+                  - "null"
+                format: date-time
+              friendlyWhen:
+                type:
+                  - string
+                  - "null"
+              message:
+                type:
+                  - string
+                  - "null"
+              number:
+                type:
+                  - integer
+                  - "null"
+              minorEdit:
+                type:
+                  - boolean
+                  - "null"
+              collaborators:
+                $ref: "#/definitions/usersUserKeys"
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: string
+          title:
+            type: string
+          type:
+            type: string
+          status:
+            type: string
+          history:
+            type: object
+            properties:
+              latest:
+                type: boolean
+              createdBy:
+                $ref: "#/definitions/user"
+              createdDate:
+                type: string
+                format: date-time
+              contributors:
+                type: object
+                properties:
+                  publishers:
+                    $ref: "#/definitions/usersUserKeys"
+              previousVersion:
+                $ref: "#/definitions/version"
+          version:
+            $ref: "#/definitions/version"
+          descendants:
+            type: object
+            properties:
+              comment:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/definitions/content"
+          restrictions:
+            type: object
+            properties:
+              read:
+                $ref: "#/definitions/contentRestriction"
+          _expandable:
+            type: object
+            properties:
+              container:
+                type: string
+              space:
+                type: string
+          _links:
+            type: object
+            properties:
+              self:
+                type: string
+              tinyui:
+                type: string
+              editui:
+                type: string
+              webui:
+                type: string
   group_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -89,11 +284,34 @@ definitions:
       requester:
         $ref: "#/definitions/requester"
         request_parameters: {}
-    primary_key: "id"
+    primary_key: id
     $parameters:
-      name: "group"
-      path: "group"
+      name: group
+      path: group
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          _links:
+            type:
+              - "null"
+              - object
   pages_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -103,11 +321,197 @@ definitions:
         request_parameters:
           expand: >-
             ["history","history.lastUpdated","history.previousVersion","history.contributors","restrictions.read.restrictions.user","version","descendants.comment","body","body.storage","body.view",]
-    primary_key: "id"
+    primary_key: id
     $parameters:
-      name: "pages"
-      path: "content?type=page"
+      name: pages
+      path: content?type=page
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        definitions:
+          user:
+            type: object
+            properties:
+              type:
+                type:
+                  - string
+                  - "null"
+              accountId:
+                type:
+                  - string
+                  - "null"
+              email:
+                type:
+                  - string
+                  - "null"
+              publicName:
+                type:
+                  - string
+                  - "null"
+          content:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              type:
+                type: string
+              status:
+                type: string
+          contentRestriction:
+            type: object
+            properties:
+              operations:
+                type:
+                  - string
+                  - "null"
+              restrictions:
+                user:
+                  type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: "#/definitions/user"
+          usersUserKeys:
+            type: object
+            properties:
+              users:
+                type: array
+                items:
+                  $ref: "#/definitions/user"
+              userKeys:
+                type: array
+                items:
+                  type: string
+          version:
+            type: object
+            properties:
+              by:
+                $ref: "#/definitions/user"
+              when:
+                type:
+                  - string
+                  - "null"
+                format: date-time
+              friendlyWhen:
+                type:
+                  - string
+                  - "null"
+              message:
+                type:
+                  - string
+                  - "null"
+              number:
+                type:
+                  - integer
+                  - "null"
+              minorEdit:
+                type:
+                  - boolean
+                  - "null"
+              collaborators:
+                $ref: "#/definitions/usersUserKeys"
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type: string
+          title:
+            type: string
+          type:
+            type: string
+          status:
+            type: string
+          history:
+            type: object
+            properties:
+              latest:
+                type: boolean
+              createdBy:
+                $ref: "#/definitions/user"
+              createdDate:
+                type: string
+                format: date-time
+              contributors:
+                type: object
+                properties:
+                  publishers:
+                    $ref: "#/definitions/usersUserKeys"
+              previousVersion:
+                $ref: "#/definitions/version"
+          version:
+            $ref: "#/definitions/version"
+          descendants:
+            type: object
+            properties:
+              comment:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/definitions/content"
+          body:
+            type: object
+            properties:
+              storage:
+                type: object
+                properties:
+                  value:
+                    type: string
+                  representation:
+                    type: string
+                  embeddedContent:
+                    type: array
+                  _expandable:
+                    type: object
+                    properties:
+                      content:
+                        type: string
+              view:
+                type: object
+                properties:
+                  value:
+                    type: string
+                  representation:
+                    type: string
+                  _expandable:
+                    type: object
+                    properties:
+                      webresource:
+                        type: string
+                  embeddedContent:
+                    type: string
+                  mediaToken:
+                    type: string
+                  content:
+                    type: string
+          restrictions:
+            type: object
+            properties:
+              read:
+                $ref: "#/definitions/contentRestriction"
+          _expandable:
+            type: object
+            properties:
+              container:
+                type: string
+              space:
+                type: string
+          _links:
+            type: object
+            properties:
+              self:
+                type: string
+              tinyui:
+                type: string
+              editui:
+                type: string
+              webui:
+                type: string
   space_stream:
     $ref: "#/definitions/base_stream"
     retriever:
@@ -116,11 +520,58 @@ definitions:
         $ref: "#/definitions/requester"
         request_parameters:
           expand: '["permissions","icon","description.plain","description.view"]'
-    primary_key: "id"
+    primary_key: id
     $parameters:
-      name: "space"
-      path: "space"
+      name: space
+      path: space
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        additionalProperties: true
+        properties:
+          id:
+            type:
+              - "null"
+              - integer
+          key:
+            type:
+              - "null"
+              - string
+          name:
+            type:
+              - "null"
+              - string
+          type:
+            type:
+              - "null"
+              - string
+          status:
+            type:
+              - "null"
+              - string
+          permissions:
+            type:
+              - "null"
+              - array
+          icon:
+            type:
+              - "null"
+              - object
+          description:
+            type:
+              - "null"
+              - object
+          _expandable:
+            type:
+              - "null"
+              - object
+          _links:
+            type:
+              - "null"
+              - object
 streams:
   - "#/definitions/audit_stream"
   - "#/definitions/blogposts_stream"
@@ -143,17 +594,20 @@ spec:
       email:
         type: string
         title: Email
-        description: "Your Confluence login email"
-        examples: ["abc@example.com"]
+        description: Your Confluence login email
+        examples: [abc@example.com]
         order: 0
       api_token:
         type: string
-        title: "API Token"
-        description: 'Please follow the Jira confluence for generating an API token: <a href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/">generating an API token</a>.'
+        title: API Token
+        description:
+          'Please follow the Jira confluence for generating an API token:
+          <a href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/">generating
+          an API token</a>.'
         airbyte_secret: true
         order: 1
       domain_name:
-        title: "Domain name"
-        description: "Your Confluence domain name"
+        title: Domain name
+        description: Your Confluence domain name
         type: string
         order: 2

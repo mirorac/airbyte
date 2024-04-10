@@ -1,18 +1,18 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     type: RecordSelector
     extractor:
       type: DpathExtractor
-      field_path: ["data", "content"]
+      field_path: [data, content]
   requester:
     type: HttpRequester
     url_base: "{{ config['api_url'] }}"
-    http_method: "GET"
+    http_method: GET
     authenticator:
-      type: "ApiKeyAuthenticator"
-      header: "x-api-key"
+      type: ApiKeyAuthenticator
+      header: x-api-key
       api_token: "{{ config['api_key'] }}"
     request_parameters:
       accountIdentifier: "{{ config['account_id'] }}"
@@ -33,14 +33,62 @@ definitions:
 
   organizations_stream:
     $ref: "#/definitions/base_stream"
-    name: "organizations"
+    name: organizations
     $parameters:
-      path: "/ng/api/organizations"
+      path: /ng/api/organizations
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        title: Organizations schema
+        additionalProperties: true
+        type:
+          - object
+          - "null"
+        properties:
+          organization:
+            type:
+              - object
+              - "null"
+            properties:
+              identifier:
+                type:
+                  - string
+                  - "null"
+              name:
+                type:
+                  - string
+                  - "null"
+              description:
+                type:
+                  - string
+                  - "null"
+              tags:
+                type:
+                  - object
+                  - "null"
+                properties:
+                  identifier:
+                    type:
+                      - string
+                      - "null"
+          createdAt:
+            type:
+              - number
+              - "null"
+          lastModifiedAt:
+            type:
+              - number
+              - "null"
+          harnessManaged:
+            type:
+              - boolean
+              - "null"
 streams:
   - "#/definitions/organizations_stream"
 
 check:
   type: CheckStream
   stream_names:
-    - "organizations"
+    - organizations

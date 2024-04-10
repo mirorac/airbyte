@@ -1,25 +1,25 @@
-version: "0.29.0"
+version: 0.29.0
 definitions:
   selector:
     extractor:
       field_path: []
   url_partition_router:
-    type: "ListPartitionRouter"
+    type: ListPartitionRouter
     values: "{{ config['urls'] }}"
     cursor_field: url
     request_option:
-      field_name: "url"
-      inject_into: "request_parameter"
+      field_name: url
+      inject_into: request_parameter
   strategy_partition_router:
-    type: "ListPartitionRouter"
+    type: ListPartitionRouter
     values: "{{ config['strategies'] }}"
     cursor_field: strategy
     request_option:
-      field_name: "strategy"
-      inject_into: "request_parameter"
+      field_name: strategy
+      inject_into: request_parameter
   requester:
-    url_base: "https://www.googleapis.com/pagespeedonline/v5/"
-    http_method: "GET"
+    url_base: https://www.googleapis.com/pagespeedonline/v5/
+    http_method: GET
     request_parameters:
       key: "{{ config['api_key'] }}"
       category: "{{ config['categories'] }}"
@@ -40,16 +40,317 @@ definitions:
     transformations:
       - type: AddFields
         fields:
-          - path: ["strategy"]
+          - path: [strategy]
             value: "{{ stream_slice.strategy }}"
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "pagespeed"
-      path: "/runPagespeed"
+      name: pagespeed
+      path: /runPagespeed
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/schema#
+        type: object
+        properties:
+          strategy:
+            type: string
+          captchaResult:
+            type: string
+          kind:
+            type: string
+          id:
+            type: string
+          loadingExperience:
+            type: object
+            properties:
+              id:
+                type: string
+              metrics:
+                type: object
+                properties:
+                  CUMULATIVE_LAYOUT_SHIFT_SCORE:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  EXPERIMENTAL_TIME_TO_FIRST_BYTE:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  FIRST_CONTENTFUL_PAINT_MS:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  FIRST_INPUT_DELAY_MS:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  LARGEST_CONTENTFUL_PAINT_MS:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+              overall_category:
+                type: string
+              initial_url:
+                type: string
+          originLoadingExperience:
+            type: object
+            properties:
+              id:
+                type: string
+              metrics:
+                type: object
+                properties:
+                  CUMULATIVE_LAYOUT_SHIFT_SCORE:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  EXPERIMENTAL_TIME_TO_FIRST_BYTE:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  FIRST_CONTENTFUL_PAINT_MS:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  FIRST_INPUT_DELAY_MS:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+                  LARGEST_CONTENTFUL_PAINT_MS:
+                    type: object
+                    properties:
+                      percentile:
+                        type: number
+                      distributions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            min:
+                              type: number
+                            max:
+                              type: number
+                            proportion:
+                              type: number
+                      category:
+                        type: string
+              overall_category:
+                type: string
+              initial_url:
+                type: string
+          lighthouseResult:
+            type: object
+            properties:
+              requestedUrl:
+                type: string
+              finalUrl:
+                type: string
+              lighthouseVersion:
+                type: string
+              userAgent:
+                type: string
+              fetchTime:
+                type: string
+              environment:
+                type: object
+                properties:
+                  networkUserAgent:
+                    type: string
+                  hostUserAgent:
+                    type: string
+                  benchmarkIndex:
+                    type: number
+              runWarnings:
+                type: array
+              configSettings:
+                type: object
+                properties:
+                  emulatedFormFactor:
+                    type: string
+                  formFactor:
+                    type: string
+                  locale:
+                    type: string
+                  onlyCategories:
+                    type: array
+                    items:
+                      type: string
+                  channel:
+                    type: string
+              audits:
+                type: object
+              categories:
+                type: object
+              categoryGroups:
+                type: object
+          analysisUTCTimestamp:
+            type: string
 streams:
   - "#/definitions/pagespeed_stream"
 
 check:
   stream_names:
-    - "pagespeed"
+    - pagespeed

@@ -1,16 +1,16 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
   selector:
     type: RecordSelector
     extractor:
       type: DpathExtractor
-      field_path: ["data"]
+      field_path: [data]
 
   requester:
     type: HttpRequester
-    url_base: "https://driftapi.com"
-    http_method: "GET"
+    url_base: https://driftapi.com
+    http_method: GET
     authenticator:
       type: BearerAuthenticator
       api_token: "{{ config['credentials']['access_token'] }}"
@@ -20,7 +20,7 @@ definitions:
     record_selector:
       $ref: "#/definitions/selector"
     paginator:
-      type: "NoPagination"
+      type: NoPagination
     requester:
       $ref: "#/definitions/requester"
 
@@ -30,14 +30,14 @@ definitions:
       $ref: "#/definitions/retriever"
 
   base_paginator:
-    type: "DefaultPaginator"
+    type: DefaultPaginator
     pagination_strategy:
-      type: "CursorPagination"
+      type: CursorPagination
       cursor_value: "{{ last_records['next'] }}"
     page_token_option:
-      type: "RequestPath"
-      field_name: "page_token"
-      inject_into: "request_parameter"
+      type: RequestPath
+      field_name: page_token
+      inject_into: request_parameter
 
   accounts_stream:
     $ref: "#/definitions/base_stream"
@@ -49,36 +49,147 @@ definitions:
         type: RecordSelector
         extractor:
           type: DpathExtractor
-          field_path: ["data", "accounts"]
-    name: "accounts"
-    primary_key: "ownerId"
+          field_path: [data, accounts]
+    name: accounts
+    primary_key: ownerId
     $parameters:
-      path: "/accounts"
+      path: /accounts
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          ownerId:
+            type: integer
+          name:
+            type: string
+          domain:
+            type: string
+          accountId:
+            type: string
+          customProperties:
+            type: array
+            items:
+              type: object
+              properties:
+                label:
+                  type: string
+                name:
+                  type: string
+                value: {}
+                type:
+                  type: string
+          deleted:
+            type: boolean
+          createDateTime:
+            type: integer
+          updateDateTime:
+            type: integer
+          targeted:
+            type: boolean
   conversations_stream:
     $ref: "#/definitions/base_stream"
     retriever:
       $ref: "#/definitions/retriever"
       paginator:
         $ref: "#/definitions/base_paginator"
-    name: "conversations"
-    primary_key: "id"
+    name: conversations
+    primary_key: id
     $parameters:
-      path: "/conversations"
+      path: /conversations
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: integer
+          participants:
+            type: array
+            items:
+              type: integer
+          status:
+            type: string
+            enum:
+              - open
+              - closed
+              - pending
+              - bulk_sent
+          contactId:
+            type: integer
+          inboxId:
+            type: integer
+          createdAt:
+            type: integer
+          updatedAt:
+            type: integer
+          relatedPlaybookId:
+            type:
+              - "null"
+              - string
+          conversationTags:
+            type: array
+            items:
+              type: object
+              properties:
+                color:
+                  type: string
+                  description: HEX value
+                name:
+                  type: string
   users_stream:
     $ref: "#/definitions/base_stream"
-    name: "users"
-    primary_key: "id"
+    name: users
+    primary_key: id
     $parameters:
-      path: "/users"
+      path: /users
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: integer
+          orgId:
+            type: integer
+          name:
+            type: string
+          alias:
+            type: string
+          email:
+            type: string
+          phone:
+            type: string
+          locale:
+            type: string
+          availability:
+            type: string
+          role:
+            type: string
+          timeZone:
+            type: string
+          avatarUrl:
+            type: string
+          verified:
+            type: boolean
+          bot:
+            type: boolean
+          createdAt:
+            type: integer
+          updatedAt:
+            type: integer
   contacts_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "contacts"
-      primary_key: "id"
-      path: "/contacts"
+      name: contacts
+      primary_key: id
+      path: /contacts
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -86,19 +197,46 @@ definitions:
         request_parameters:
           email: "{{ config['email'] }}"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+          attributes:
+            type: object
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+              phone:
+                type: string
+              tags:
+                type: array
+                items:
+                  type: string
+              events: {}
+              socialProfiles: {}
+          createdAt:
+            type: integer
   messages_partition_router:
     type: SubstreamPartitionRouter
     parent_stream_configs:
       - stream: "#/definitions/conversations_stream"
-        parent_key: "id"
-        partition_field: "parent_id"
+        parent_key: id
+        partition_field: parent_id
 
   messages_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "messages"
-      primary_key: "id"
-      path: "/conversations/{{ stream_partition.parent_id }}/messages"
+      name: messages
+      primary_key: id
+      path: /conversations/{{ stream_partition.parent_id }}/messages
     retriever:
       $ref: "#/definitions/retriever"
       paginator:
@@ -107,10 +245,69 @@ definitions:
         type: RecordSelector
         extractor:
           type: DpathExtractor
-          field_path: ["data", "messages"]
+          field_path: [data, messages]
       partition_router:
         $ref: "#/definitions/messages_partition_router"
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: integer
+          orgId:
+            type: integer
+          body:
+            type: string
+          author:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - contact
+                  - user
+              id:
+                type: integer
+              bot:
+                type: boolean
+          type:
+            type: string
+          conversationId:
+            type: integer
+          createdAt:
+            type: integer
+          buttons:
+            type: array
+            items:
+              type: object
+              properties:
+                label:
+                  type: string
+                value:
+                  type: string
+                type:
+                  type: string
+                style:
+                  type: string
+                reaction:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    message:
+                      type: string
+          context:
+            type: object
+            properties:
+              ip:
+                type: string
+              userAgent:
+                type: string
+          attributes:
+            type: object
 streams:
   - "#/definitions/accounts_stream"
   - "#/definitions/conversations_stream"
@@ -121,8 +318,8 @@ streams:
 check:
   type: CheckStream
   stream_names:
-    - "accounts"
-    - "conversations"
-    - "users"
-    - "contacts"
-    - "messages"
+    - accounts
+    - conversations
+    - users
+    - contacts
+    - messages

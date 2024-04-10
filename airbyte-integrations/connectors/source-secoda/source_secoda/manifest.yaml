@@ -1,15 +1,12 @@
-version: "0.29.0"
+version: 0.29.0
 
 definitions:
-  schema_loader:
-    type: JsonFileSchemaLoader
-    file_path: "./source_secoda/schemas/{{ parameters.name }}.json"
   selector:
     extractor:
-      field_path: ["results"]
+      field_path: [results]
   requester:
-    url_base: "https://api.secoda.co"
-    http_method: "GET"
+    url_base: https://api.secoda.co
+    http_method: GET
     authenticator:
       type: BearerAuthenticator
       api_token: "{{ config['api_key'] }}"
@@ -23,9 +20,9 @@ definitions:
       type: RequestPath
     page_size_option:
       inject_into: body_data
-      field_name: "page_size"
+      field_name: page_size
     pagination_strategy:
-      type: "CursorPagination"
+      type: CursorPagination
       cursor_value: "{{ response.links.next }}"
       stop_condition: "{{ response.links.next is none}}"
       page_size: 1
@@ -42,22 +39,126 @@ definitions:
   tables_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "tables"
-      primary_key: "id"
-      path: "/table/tables/"
+      name: tables
+      primary_key: id
+      path: /table/tables/
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: string
+          type:
+            type: string
+          published:
+            type: boolean
+          pii:
+            type: boolean
+          created_at:
+            type: string
+          updated_at:
+            type: string
+          tags:
+            type: array
+          name:
+            type: string
+          schema:
+            type: string
+          cluster:
+            type: string
+          database:
+            type: string
+          owners:
+            type: array
+          description:
+            type:
+              - "null"
+              - string
+          columns:
+            type: array
+          parent_id:
+            type: string
+          integration:
+            type: string
+          entity_type:
+            type: string
+          pristine:
+            type: boolean
+          verified:
+            type: boolean
   terms_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "terms"
-      primary_key: "id"
-      path: "/dictionary/terms/"
+      name: terms
+      primary_key: id
+      path: /dictionary/terms/
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: string
+          created_at:
+            type: string
+          updated_at:
+            type: string
+          title:
+            type: string
+          description:
+            type: string
+          collections:
+            type: array
+          owners:
+            type: array
+          published:
+            type: boolean
+          pristine:
+            type: boolean
+          viewers_delta:
+            type: object
+          entity_type:
+            type: string
   collections_stream:
     $ref: "#/definitions/base_stream"
     $parameters:
-      name: "collections"
-      primary_key: "id"
-      path: "/collection/collections/"
+      name: collections
+      primary_key: id
+      path: /collection/collections/
 
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        $schema: http://json-schema.org/draft-07/schema#
+        type: object
+        properties:
+          id:
+            type: string
+          created_at:
+            type: string
+          updated_at:
+            type: string
+          entity_type:
+            type: string
+          title:
+            type: string
+          description:
+            type: string
+          definition:
+            type: string
+          workspace_id:
+            type: string
+          published:
+            type: boolean
+          archived:
+            type: boolean
+          pii:
+            type: boolean
+          verified:
+            type: boolean
 streams:
   - "#/definitions/tables_stream"
   - "#/definitions/terms_stream"
@@ -65,4 +166,4 @@ streams:
 
 check:
   stream_names:
-    - "tables"
+    - tables
