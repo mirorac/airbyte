@@ -99,6 +99,23 @@
     "display_as_bot": {
       "type": ["null", "boolean"]
     },
+    "files": {
+      "items": {
+        "properties": {
+          "created": {
+            "type": ["null", "integer"]
+          },
+          "timestamp": {
+            "type": ["null", "integer"]
+          },
+          "size": {
+            "type": ["null", "integer"]
+          }
+        },
+        "type": ["null", "object"]
+      },
+      "type": ["null", "array"]
+    },
     "file_id": {
       "type": ["null", "string"]
     },
